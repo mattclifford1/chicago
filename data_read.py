@@ -18,13 +18,12 @@ Y = np.array(Y)
 X = np.delete(X,0)
 Y = np.delete(Y,0)
 
-#get rid of any incomplete 'nan' entries from the data
+#get rid of any incomplete 'nan' entries from the data (using indexing for speed instead of deleting)
 dataLen = len(X)
 for i in tqdm(range(len(X))):
 	if X[i] == 'nan':     #n.b. no entry in X iff no entry in Y (true for our data)
-		# X = np.delete(X,i)
-		# Y = np.delete(Y,i)
 		dataLen -= 1
+
 Xclean = np.zeros(dataLen)    #define arrays
 Yclean = np.zeros(dataLen)
 ind = 0 
