@@ -1,7 +1,6 @@
 import csv
 
-with open('crimes2016.csv', newline='') as csvfile:
-	rea = csv.reader(csvfile)
-
-print(type(rea))
-print(reader[0,0])
+with open('Book1.csv', newline='') as csvfile:
+     spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+     for row in spamreader:
+         print(', '.join(row))
