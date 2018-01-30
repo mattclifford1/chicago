@@ -38,8 +38,15 @@ for i in tqdm(range(len(X))):
 		Pclean[ind] = P[i]
 		ind += 1
 
-#save array
-dataClean = np.array([Xclean,Yclean,Pclean])
-np.save('dataClean.npy',dataClean)
 
+#save arrays
+dataCoord = np.array([Xclean,Yclean])
+
+np.save('dataCoord.npy',dataCoord)
+np.save('severity.npy',Pclean)
+
+
+# import scipy.io
+
+# scipy.io.savemat('data.mat', dict(X=Xclean, Y=Yclean))
 
