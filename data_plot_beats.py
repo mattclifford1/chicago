@@ -1,11 +1,12 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
+from collections import Counter
 
+Beats = np.load('beats.npy')    #load coordinate data
+sevStr = np.load('severity2.npy')        #load severity
 
-dataCoord = np.load('dataCoord.npy')    #load coordinate data
-X = dataCoord[0,:]                      #and separate
-Y = dataCoord[1,:]
-sevStr = np.load('severity.npy')        #load severity
+#Need to assign x and y to beat
+
 
 #lookup of numberal equivelant (should be done in a dict really)
 primary = ['ARSON', 'ASSAULT', 'BATTERY','BURGLARY','CONCEALED CARRY LICENSE VIOLATION','CRIM SEXUAL ASSAULT','CRIMINAL DAMAGE','CRIMINAL TRESPASS','DECEPTIVE PRACTICE','GAMBLING','HOMICIDE','HUMAN TRAFFICKING','INTERFERENCE WITH PUBLIC OFFICER','INTIMIDATION','KIDNAPPING','LIQUOR LAW VIOLATION','MOTOR VEHICLE THEFT','NARCOTICS','OBSCENITY','OFFENSE INVOLVING CHILDREN','OTHER NARCOTIC VIOLATION','OTHER OFFENSE','PROSTITUTION','PUBLIC INDECENCY','PUBLIC PEACE VIOLATION', 'ROBBERY','SEX OFFENSE','STALKING','THEFT','WEAPONS VIOLATION','NON-CRIMINAL']
@@ -17,28 +18,18 @@ for i in range(len(sevStr)):
 	ind = primary.index(sevStr[i])
 	sev[i] = severity[ind]
 
-#find min and 'width' for image space
-x_min = np.min(X)
-y_min = np.min(Y)
-x_len = int(np.max(X) - x_min)
-y_len = int(np.max(Y) - y_min)
+tally = np.zeros(50)
 
-#shift to [0,0] to save figure space
-x_shift = X - x_min
-y_shift = Y - y_min
+for i in range(len(Beats)):
+    for j in range(50):
+        if Beats[i]==j:
+            tally[j]+=1
 
-data_reduce = 1000   #make image a sensible size
+count = Counter(Beats)       
+keys = count.keys()
+print(count.values())
 
-#define image size
-heatIm =  np.zeros([int(np.ceil((y_len+1)/data_reduce)), int(np.ceil((x_len+1)/data_reduce))], dtype=np.uint16)
 
-#sum severities for image locations, n.b. x axis has to be flipped to match image coordinates
-for i in range(len(X)):
-	heatIm[abs(int(y_shift[i]/data_reduce)-heatIm.shape[0]+1), int(x_shift[i]/data_reduce)] += int(sev[i]*10)
+plt.bar(list(keys), count.values())
+plt.show()
 
-#plot and save image
-plt.imshow(heatIm,cmap='hot')
-plt.xticks([])
-plt.yticks([])
-plt.savefig('heatmap.png')
-print('saved')
