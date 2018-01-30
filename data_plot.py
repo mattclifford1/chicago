@@ -16,36 +16,6 @@ for i in range(data.shape[1]):
 
 X = data[0,:]
 Y = data[1,:]
-# create x-y points to be used in heatmap
-xi = np.linspace(X.min(),X.max(),1000)
-yi = np.linspace(Y.min(),Y.max(),1000)
-
-# Z is a matrix of x-y values
-zi = griddata((X, Y), sev, (xi[None,:], yi[:,None]), method='cubic')
-
-# I control the range of my colorbar by removing data 
-# outside of my range of interest
-zmin = 3
-zmax = 12
-zi[(zi<zmin) | (zi>zmax)] = None
-
-# Create the contour plot
-CS = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.rainbow,
-                  vmax=zmax, vmin=zmin)
-plt.colorbar()  
-plt.show()
-
-
-
-
-
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-x = data[0,:]
-y = data[1,:]
-
-# ax.scatter(x,y,sev, c='r', marker='o')
-ax.scatter(x, y, sev)
-# plt.savefig("demo.png")
+plt.plot(X,Y,'x')
 
 plt.show()
