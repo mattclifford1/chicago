@@ -18,7 +18,7 @@ X.remove('PrimaryType')
 
 #finding the index of a specific crime primary type
 X = np.array(X)
-find_item = np.where(X==Y[0])
+find_item = np.where(X==Y[21])
 index = find_item[0]
 
 Z = data.Description.tolist()
