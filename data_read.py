@@ -37,6 +37,7 @@ Yclean = np.zeros(dataLen)
 Pclean = [0] * dataLen
 
 Beat = np.zeros(dataLen2)
+BeatClean = np.zeros(dataLen)
 P_delete = [0] * dataLen2
 
 ind = 0
@@ -47,6 +48,7 @@ for i in tqdm(range(len(X))):
         Xclean[ind] = X[i]
         Yclean[ind] = Y[i]
         Pclean[ind] = P[i]
+        BeatClean[ind] = B[i]
         ind += 1
     else:
         Beat[ind2] = B[i]
@@ -61,6 +63,7 @@ dataCoord = np.array([Xclean,Yclean])
 np.save('dataCoord.npy',dataCoord)
 np.save('severity.npy',Pclean)
 np.save('beats.npy', Beat)
+np.save('beatsClean.npy', BeatClean)
 np.save('severity2.npy', P_delete)
 
 
