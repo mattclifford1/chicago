@@ -2,30 +2,22 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 def main():
-	X, Y, sev = getData()
-	reduction = 1000
-	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+	for i in range(0,24):
+		X, Y, sev = getData(str(i))
+		reduction = 1000
+		if len(X) > 1:
+			heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+			plt.savefig('time_' + str(i) + '.png')
+			print('saved at time ' + str(i))
+			plt.clf()
+		else:
+			print('empty data at time ' + str(i))
+		# plot_results(heatData, gmm.predict(heatData), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
 
-	x1 = 1148220
-	y1 = 1899677
-	sevNorm = getSev(x1, y1, heatIm, reduction, x_min, y_min)
-	print('severity at (' + str(x1)+', ' + str(y1) +') is: ' + str(sevNorm))
-	heatData = heatmapData(heatIm)
+def getData(num):
+	import data_date
 
-	from sklearn import mixture
-	# gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
-	gmm = mixture.GaussianMixture(n_components=15).fit(heatData)
-	labels = gmm.predict(heatData)
-	print('done')
-	plt.scatter(heatData[:, 1], heatData[:, 0], c=labels, s=1, cmap='viridis')
-	plt.show()
-	# plot_results(heatData, gmm.predict(heatData), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
-
-def getData():
-	dataCoord = np.load('dataCoord.npy')    #load coordinate data
-	X = dataCoord[0,:]                      #and separate
-	Y = dataCoord[1,:]
-	sevStr = np.load('severity.npy')        #load severity
+	X,Y,sevStr,Dtime = data_date.data_time(num)
 
 	#lookup of numberal equivelant (should be done in a dict really)
 	primary = ['ARSON', 'ASSAULT', 'BATTERY','BURGLARY','CONCEALED CARRY LICENSE VIOLATION','CRIM SEXUAL ASSAULT','CRIMINAL DAMAGE','CRIMINAL TRESPASS','DECEPTIVE PRACTICE','GAMBLING','HOMICIDE','HUMAN TRAFFICKING','INTERFERENCE WITH PUBLIC OFFICER','INTIMIDATION','KIDNAPPING','LIQUOR LAW VIOLATION','MOTOR VEHICLE THEFT','NARCOTICS','OBSCENITY','OFFENSE INVOLVING CHILDREN','OTHER NARCOTIC VIOLATION','OTHER OFFENSE','PROSTITUTION','PUBLIC INDECENCY','PUBLIC PEACE VIOLATION', 'ROBBERY','SEX OFFENSE','STALKING','THEFT','WEAPONS VIOLATION','NON-CRIMINAL']
@@ -64,9 +56,6 @@ def makeHeatmap(X, Y, sev, data_reduce):
 	plt.imshow(heatIm,cmap='hot')
 	plt.xticks([])
 	plt.yticks([])
-	plt.savefig('heatmap.png')
-	print('saved')
-	# plt.clf()
 	return heatIm, x_min, y_min
 
 def getSev(x1, y1, heatIm, data_reduce, x_min, y_min):  #x and y are point from original scaling from chicago data set
