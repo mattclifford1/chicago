@@ -13,7 +13,7 @@ def main():
 			plt.clf()
 		else:
 			print('empty data at time ' + str(i))
-		#to make gif in terminal use command: 
+		#to make gif using imageMagik, use terminal command: 
 		#convert -loop 0 -delay 40 time_10.png time_11.png time_12.png time_13.png time_14.png time_15.png time_16.png time_17.png time_18.png time_19.png time_20.png time_21.png time_22.png time_23.png time.gif
 def getData(num):
 	import data_date
