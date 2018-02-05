@@ -7,13 +7,14 @@ def main():
 		reduction = 1000
 		if len(X) > 1:
 			heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+			plt.title('time ' + str(i) + ':00')
 			plt.savefig('time_' + str(i) + '.png')
 			print('saved at time ' + str(i))
 			plt.clf()
 		else:
 			print('empty data at time ' + str(i))
-		# plot_results(heatData, gmm.predict(heatData), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
-
+		#to make gif in terminal use command: 
+		#convert -loop 0 -delay 40 time_10.png time_11.png time_12.png time_13.png time_14.png time_15.png time_16.png time_17.png time_18.png time_19.png time_20.png time_21.png time_22.png time_23.png time.gif
 def getData(num):
 	import data_date
 
@@ -44,7 +45,7 @@ def makeHeatmap(X, Y, sev, data_reduce):
 	x_min = 1094.231
 	y_min = 1813.91
 	x_len = 110.886
-	y_len = 110.886
+	y_len = 137.625
 
 	#shift to [0,0] to save figure space
 	x_shift = X - x_min
