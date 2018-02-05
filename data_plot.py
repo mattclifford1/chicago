@@ -41,6 +41,11 @@ def makeHeatmap(X, Y, sev, data_reduce):
 	x_len = np.max(X) - x_min
 	y_len = np.max(Y) - y_min
 
+	x_min = 1094.231
+	y_min = 1813.91
+	x_len = 110.886
+	y_len = 110.886
+
 	#shift to [0,0] to save figure space
 	x_shift = X - x_min
 	y_shift = Y - y_min
