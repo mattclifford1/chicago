@@ -9,13 +9,13 @@ def data_time(num):
     depending on the desired time
     
     Input:
-    num = time of day in 24-hour clock that wanna observe data(e.g. '15' for 3pm)
+    num = time of day in 24-hour clock that wanna observe data(e.g. '15' for 3pm or '09' for 9am)
     
     Output:
     Xtime = X-Coordinates with respect to all crimes in the specified time 
     Ytime = Y-Coordinates with respect to all crimes in the specified time
     Ptime = Primary type of crime for all crimes in specified time
-    Dtime = Checking if the program worked correctly (i.e. all values of these should be '15')
+    Dtime = Checking if the program worked correctly (i.e. all values of these should be '15' or '09')
     '''
     #define column names
     colnames = ['ID', 'Case Number', 'Date', 'Block', 'IUCR','PrimaryType','Description','Location Description','Arrest','Domestic','Beat','District','Ward','Community','FBI Code','XCoordinate','YCoordinate','Year','Updated On','Latitude','Longitude','Location']
@@ -81,5 +81,10 @@ def data_time(num):
     
     return Xtime,Ytime,Ptime,Dtime
 
-Xtime,Ytime,Ptime,Dtime = data_time('15')
+i = ['00','01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23']
+Dtimesize = np.zeros(len(i))
+
+for j in range(len(i)):
+    Xtime,Ytime,Ptime,Dtime = data_time(i[j])
+    Dtimesize[j] = len(Dtime)
        
