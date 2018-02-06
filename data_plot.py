@@ -1,10 +1,11 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
-
+from matplotlib import cm
 def main():
 	X, Y, sev = getData()
 	reduction = 1000
 	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+	print(heatIm.shape)
 	x1 = 1148220
 	y1 = 1899677
 	sevNorm = getSev(x1, y1, heatIm, reduction, x_min, y_min)
@@ -12,16 +13,52 @@ def main():
 	heatData = heatmapData(heatIm)
 
 	from sklearn import mixture
-	gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
-	# gmm = mixture.GaussianMixture(n_components=3).fit(heatData)
-	labels = gmm.predict(heatData)
-	means = hmm.means
-	print('done')
-	plt.scatter(heatData[:, 1], heatData[:, 0], c=labels, s=1, cmap='viridis')
+	# gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
+	c =17
+	gmm = mixture.GaussianMixture(n_components=c).fit(heatData)
+
+	#do 3d plot
+	from matplotlib import cm
+	from mpl_toolkits.mplot3d import Axes3D
+	from scipy.stats import multivariate_normal
+	plt.clf()
+	fig=plt.figure();
+	# ax=fig.add_subplot(111,projection='3d')
+	ax=fig.add_subplot(111)
+
+	for i in range(c):
+		plot3dGauss(gmm.means_[i,:], gmm.covariances_[i,:,:], ax, X, Y)
+
+	
 	plt.show()
-	plot_results(heatData, gmm.predict(heatData), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
+	# sio.savemat('np_xector.mat', {'xect':coord})
+	# labels = gmm.predict(heatData)
+	# # means = hmm.means
+	# print('done')
+	# plt.scatter(heatData[:, 1], heatData[:, 0], c=labels, s=1, cmap='viridis')
+	# plt.show()
+	# plot_results(heatData, gmm.predict(heatData), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
 
 	#do DBscan 
+def plot3dGauss(mean, cov, ax, X, Y):
+	from scipy.stats import multivariate_normal
+	resolution = 100
+	Xmesh,Ymesh = np.meshgrid(np.linspace(np.min(X),np.max(X),resolution),np.linspace(np.min(Y),np.max(Y),resolution))
+	Xmesh,Ymesh = np.meshgrid(np.linspace(0,112,resolution),np.linspace(0,139,resolution))
+	Xmesh = np.transpose(Xmesh)
+	Ymesh = np.transpose(Ymesh)
+
+	coord = np.empty([Xmesh.size,2])
+	count = 0 
+	for i in range(Xmesh.shape[0]):
+		for j in range(Xmesh.shape[1]):
+			coord[count,0] = Xmesh[i,j]
+			coord[count,1] = Ymesh[i,j]
+			count += 1
+
+	probs = multivariate_normal(mean,cov).pdf(coord)
+	P = np.reshape(probs,[resolution, resolution])
+	ax.contour(Xmesh, Ymesh, P)
 
 def getData():
 	dataCoord = np.load('dataCoord.npy')    #load coordinate data
