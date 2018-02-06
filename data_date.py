@@ -18,6 +18,8 @@ def data_time(num):
     Dtime = Checking if the program worked correctly (i.e. all values of these should be '15')
     '''
     #define column names
+    if len(num) == 1:
+        num = '0' + num
     colnames = ['ID', 'Case Number', 'Date', 'Block', 'IUCR','PrimaryType','Description','Location Description','Arrest','Domestic','Beat','District','Ward','Community','FBI Code','XCoordinate','YCoordinate','Year','Updated On','Latitude','Longitude','Location']
     data = pandas.read_csv('crimes2016.csv', names=colnames)  #extract data
     
@@ -81,5 +83,5 @@ def data_time(num):
     
     return Xtime,Ytime,Ptime,Dtime
 
-Xtime,Ytime,Ptime,Dtime = data_time('15')
+
        
