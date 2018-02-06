@@ -1,5 +1,5 @@
-import numpy as np 
-import matplotlib.pyplot as plt 
+import numpy as np
+import matplotlib.pyplot as plt
 from collections import Counter
 
 Beats = np.load('beats.npy')    #load beats data for missing data
@@ -19,23 +19,16 @@ sevClean = np.zeros(len(sevStrClean))
 for i in range(len(sevStr)):
 	ind = primary.index(sevStr[i])
 	sev[i] = severity[ind]
-    
+
 for i in range(len(sevStrClean)):
 	ind = primary.index(sevStrClean[i])
 	sevClean[i] = severity[ind]
 
-tally = np.zeros(50)
-
-for i in range(len(Beats)):
-    for j in range(50):
-        if Beats[i]==j:
-            tally[j]+=1
-
-count = Counter(Beats)       
+count = Counter(Beats)
 keys = count.keys()
 print(count.values())
 
-countClean = Counter(BeatsClean)       
+countClean = Counter(BeatsClean)
 keysClean = countClean.keys()
 
 
@@ -50,4 +43,3 @@ plt.title('Wards without data missing')
 plt.xlabel('Ward')
 plt.ylabel('Number of crimes')
 plt.show()
-
