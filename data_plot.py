@@ -13,13 +13,16 @@ def main():
 	heatData = heatmapData(heatIm)
 
 	from sklearn import mixture
-	# gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
-	gmm = mixture.GaussianMixture(n_components=15).fit(heatData)
+	gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
+	# gmm = mixture.GaussianMixture(n_components=3).fit(heatData)
 	labels = gmm.predict(heatData)
+	means = hmm.means
 	print('done')
 	plt.scatter(heatData[:, 1], heatData[:, 0], c=labels, s=1, cmap='viridis')
 	plt.show()
-	# plot_results(heatData, gmm.predict(heatData), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
+	plot_results(heatData, gmm.predict(heatData), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
+
+	#do DBscan 
 
 def getData():
 	dataCoord = np.load('dataCoord.npy')    #load coordinate data
