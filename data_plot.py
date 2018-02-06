@@ -5,7 +5,6 @@ def main():
 	X, Y, sev = getData()
 	reduction = 1000
 	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
-
 	x1 = 1148220
 	y1 = 1899677
 	sevNorm = getSev(x1, y1, heatIm, reduction, x_min, y_min)
