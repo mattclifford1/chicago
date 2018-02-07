@@ -1,33 +1,86 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
 from matplotlib import cm
+import plotly.offline as py
 def main():
-	X, Y, sev = getData()
-	reduction = 1000
-	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
-	print(heatIm.shape)
-	x1 = 1148220
-	y1 = 1899677
-	sevNorm = getSev(x1, y1, heatIm, reduction, x_min, y_min)
-	print('severity at (' + str(x1)+', ' + str(y1) +') is: ' + str(sevNorm))
-	heatData = heatmapData(heatIm)
+	Lat, Long, sev = getData()
+	scl = [0,"rgb(0,0,0)"],[1,"rgb(255, 0, 0)"]
+	data = [ dict(
+	    lat = Lat,
+	    lon = Long,
+	    text = sev,
+	    marker = dict(
+	        color = sev,
+	        colorscale = scl,
+	        reversescale = True,
+	        opacity = 0.5,
+	        size = 0.5,
+	        colorbar = dict(
+	            thickness = 10,
+	            titleside = "right",
+	            outlinecolor = "rgba(68, 68, 68, 0)",
+	            ticks = "outside",
+	            ticklen = 3,
+	            showticksuffix = "last",
+	            dtick = 0.1
+	        ),
+	    ),
+	    type = 'scattergeo'
+	) ]
+	layout = dict(
+	    geo = dict(
+	        showland = True,
+	        showrivers = True,
+	        # landcolor = "rgb(212, 212, 212)",
+	        # subunitcolor = "rgb(255, 255, 255)",
+	        # countrycolor = "rgb(255, 255, 255)",
+	        showlakes = True,
+	        # lakecolor = "rgb(255, 255, 255)",
+	        showsubunits = True,
+	        showcountries = True,
+	        resolution = 50,
+	        lonaxis = dict(
+	            showgrid = True,
+	            gridwidth = 0.5,
+	            range= [ -88, -87.5 ],
+	            dtick = 5
+	        ),
+	        lataxis = dict (
+	            showgrid = True,
+	            gridwidth = 0.5,
+	            range= [ 41.5, 42.1 ],
+	            dtick = 5
+	        )
+	    ),
+	    title = 'Crime in Chicago',
+	)
+	fig = { 'data':data, 'layout':layout }
+	py.plot(fig, filename='scattermap.html')
+	# reduction = 1000
+	# heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+	# print(heatIm.shape)
+	# x1 = 1148220
+	# y1 = 1899677
+	# sevNorm = getSev(x1, y1, heatIm, reduction, x_min, y_min)
+	# print('severity at (' + str(x1)+', ' + str(y1) +') is: ' + str(sevNorm))
+	# heatData = heatmapData(heatIm)
 
-	from sklearn import mixture
-	# gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
-	c =17
-	gmm = mixture.GaussianMixture(n_components=c).fit(heatData)
+	# from sklearn import mixture
+	# # gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
+	# c =17
+	# gmm = mixture.GaussianMixture(n_components=c).fit(heatData)
 
-	#do 3d plot
-	from matplotlib import cm
-	from mpl_toolkits.mplot3d import Axes3D
-	from scipy.stats import multivariate_normal
-	plt.clf()
-	fig=plt.figure();
-	# ax=fig.add_subplot(111,projection='3d')
-	ax=fig.add_subplot(111)
+	# #do 3d plot
+	# from matplotlib import cm
+	# from mpl_toolkits.mplot3d import Axes3D
+	# from scipy.stats import multivariate_normal
+	# plt.clf()
+	# fig=plt.figure();
+	# # ax=fig.add_subplot(111,projection='3d')
+	# ax=fig.add_subplot(111)
 
-	for i in range(c):
-		plot3dGauss(gmm.means_[i,:], gmm.covariances_[i,:,:], ax, X, Y)
+	# for i in range(c):
+	# 	plot3dGauss(gmm.means_[i,:], gmm.covariances_[i,:,:], ax, X, Y)
 
 	
 	plt.show()
@@ -61,9 +114,9 @@ def plot3dGauss(mean, cov, ax, X, Y):
 	ax.contour(Xmesh, Ymesh, P)
 
 def getData():
-	dataCoord = np.load('dataCoord.npy')    #load coordinate data
-	X = dataCoord[0,:]                      #and separate
-	Y = dataCoord[1,:]
+	dataLL = np.load('dataLL.npy')    #load coordinate data
+	Lat = dataLL[0,:]                      #and separate
+	Long = dataLL[1,:]
 	sevStr = np.load('severity.npy')        #load severity
 
 	#lookup of numberal equivelant (should be done in a dict really)
@@ -75,7 +128,8 @@ def getData():
 	for i in range(len(sevStr)):
 		ind = primary.index(sevStr[i])
 		sev[i] = severity[ind]
-	return X, Y, sev
+	sev = sev/(np.max(sev)) #normalise
+	return Lat, Long, sev
 
 def makeHeatmap(X, Y, sev, data_reduce):
 	#reduce data size
