@@ -2,98 +2,35 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from matplotlib import cm
 import plotly.offline as py
+import plotly.plotly as pyonline
 def main():
-	Lat, Long, sev = getData()
-	scl = [0,"rgb(0,0,0)"],[1,"rgb(255, 0, 0)"]
-	data = [ dict(
-	    lat = Lat,
-	    lon = Long,
-	    text = sev,
-	    marker = dict(
-	        color = sev,
-	        colorscale = scl,
-	        reversescale = True,
-	        opacity = 0.5,
-	        size = 0.5,
-	        colorbar = dict(
-	            thickness = 10,
-	            titleside = "right",
-	            outlinecolor = "rgba(68, 68, 68, 0)",
-	            ticks = "outside",
-	            ticklen = 3,
-	            showticksuffix = "last",
-	            dtick = 0.1
-	        ),
-	    ),
-	    type = 'scattergeo'
-	) ]
-	layout = dict(
-	    geo = dict(
-	        showland = True,
-	        showrivers = True,
-	        # landcolor = "rgb(212, 212, 212)",
-	        # subunitcolor = "rgb(255, 255, 255)",
-	        # countrycolor = "rgb(255, 255, 255)",
-	        showlakes = True,
-	        # lakecolor = "rgb(255, 255, 255)",
-	        showsubunits = True,
-	        showcountries = True,
-	        resolution = 50,
-	        lonaxis = dict(
-	            showgrid = True,
-	            gridwidth = 0.5,
-	            range= [ -88, -87.5 ],
-	            dtick = 5
-	        ),
-	        lataxis = dict (
-	            showgrid = True,
-	            gridwidth = 0.5,
-	            range= [ 41.5, 42.1 ],
-	            dtick = 5
-	        )
-	    ),
-	    title = 'Crime in Chicago',
-	)
-	fig = { 'data':data, 'layout':layout }
-	py.plot(fig, filename='scattermap.html')
-	# reduction = 1000
-	# heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
-	# print(heatIm.shape)
-	# x1 = 1148220
-	# y1 = 1899677
-	# sevNorm = getSev(x1, y1, heatIm, reduction, x_min, y_min)
-	# print('severity at (' + str(x1)+', ' + str(y1) +') is: ' + str(sevNorm))
-	# heatData = heatmapData(heatIm)
+	X, Y, sev = getData()
+	reduction = 1000
+	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+	heatData = heatmapData(heatIm)
 
-	# from sklearn import mixture
-	# # gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
-	# c =17
-	# gmm = mixture.GaussianMixture(n_components=c).fit(heatData)
+	#do EM
+	EM(heatData)
 
-	# #do 3d plot
-	# from matplotlib import cm
-	# from mpl_toolkits.mplot3d import Axes3D
-	# from scipy.stats import multivariate_normal
-	# plt.clf()
-	# fig=plt.figure();
-	# # ax=fig.add_subplot(111,projection='3d')
-	# ax=fig.add_subplot(111)
+	#load guassian data computed from EM - need to have run EM before to have saved file
+	means = np.load('means.npy')
+	cov = np.load('cov.npy')
 
-	# for i in range(c):
-	# 	plot3dGauss(gmm.means_[i,:], gmm.covariances_[i,:,:], ax, X, Y)
-
-	
-	plt.show()
-	# sio.savemat('np_xector.mat', {'xect':coord})
-	# labels = gmm.predict(heatData)
-	# # means = hmm.means
-	# print('done')
-	# plt.scatter(heatData[:, 1], heatData[:, 0], c=labels, s=1, cmap='viridis')
-	# plt.show()
-	# plot_results(heatData, gmm.predict(heatData), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
+	#make list of each guassian as np.array
+	G = [0]*means.shape[0]    #initialise
+	for i in range(means.shape[0]):
+		G[i] = grids(means[i,:], cov[i,:,:], X, Y)
+	#make guassan data into format plotly takes
+	data = [0]*means.shape[0]
+	for x in range(means.shape[0]):
+		data[x] = {'z':G[x][2], 'type':'surface'}
+	#plot
+	py.plot(data,filename='GMM.html')  #offline plot
+	# pyonline.iplot(data,filename='surfface') #upload to online
 
 	#do DBscan 
-def plot3dGauss(mean, cov, ax, X, Y):
+
+def grids(mean, cov, X, Y):  #make grids of probabilities given guassian data
 	from scipy.stats import multivariate_normal
 	resolution = 100
 	Xmesh,Ymesh = np.meshgrid(np.linspace(np.min(X),np.max(X),resolution),np.linspace(np.min(Y),np.max(Y),resolution))
@@ -111,12 +48,20 @@ def plot3dGauss(mean, cov, ax, X, Y):
 
 	probs = multivariate_normal(mean,cov).pdf(coord)
 	P = np.reshape(probs,[resolution, resolution])
-	ax.contour(Xmesh, Ymesh, P)
+
+	return [Xmesh, Ymesh, P]
+
+def EM(heatData):   #save EM data
+	from sklearn import mixture
+	gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
+	# gmm = mixture.GaussianMixture(n_components=###).fit(heatData)
+	np.save('means.npy',gmm.means_)
+	np.save('cov.npy',gmm.covariances_)
 
 def getData():
-	dataLL = np.load('dataLL.npy')    #load coordinate data
-	Lat = dataLL[0,:]                      #and separate
-	Long = dataLL[1,:]
+	dataCoord = np.load('dataCoord.npy')    #load coordinate data
+	X = dataCoord[0,:]                      #and separate
+	Y = dataCoord[1,:]
 	sevStr = np.load('severity.npy')        #load severity
 
 	#lookup of numberal equivelant (should be done in a dict really)
@@ -129,7 +74,7 @@ def getData():
 		ind = primary.index(sevStr[i])
 		sev[i] = severity[ind]
 	sev = sev/(np.max(sev)) #normalise
-	return Lat, Long, sev
+	return X, Y, sev
 
 def makeHeatmap(X, Y, sev, data_reduce):
 	#reduce data size
