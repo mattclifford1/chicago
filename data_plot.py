@@ -1,5 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
+from scipy.misc import imread
+import matplotlib.cbook as cbook
 
 
 dataCoord = np.load('dataCoord.npy')    #load coordinate data
@@ -36,8 +38,15 @@ heatIm =  np.zeros([int(np.ceil((y_len+1)/data_reduce)), int(np.ceil((x_len+1)/d
 for i in range(len(X)):
 	heatIm[abs(int(y_shift[i]/data_reduce)-heatIm.shape[0]+1), int(x_shift[i]/data_reduce)] += int(sev[i]*10)
 
+
+#Image background
+img = imread('chicago_image.jpg')
+plt.imshow(img, zorder=0, extent=[0, 112, 138, 0])
+
+
+
 #plot and save image
-plt.imshow(heatIm,cmap='hot')
+plt.imshow(heatIm, zorder=1, cmap='hot', alpha=0.8)
 plt.xticks([])
 plt.yticks([])
 plt.savefig('heatmap.png')
