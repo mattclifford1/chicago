@@ -5,12 +5,12 @@ import plotly.offline as py
 import plotly.plotly as pyonline
 def main():
 	X, Y, sev = getData()
-	reduction = 1000
-	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
-	heatData = heatmapData(heatIm)
+	# reduction = 1000
+	# heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+	# heatData = heatmapData(heatIm)
 
 	#do EM
-	EM(heatData)
+	# EM(heatData)
 
 	#load guassian data computed from EM - need to have run EM before to have saved file
 	means = np.load('means.npy')
@@ -23,10 +23,22 @@ def main():
 	#make guassan data into format plotly takes
 	data = [0]*means.shape[0]
 	for x in range(means.shape[0]):
-		data[x] = {'z':G[x][2], 'type':'surface'}
+		data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
 	#plot
-	py.plot(data,filename='GMM.html')  #offline plot
-	# pyonline.iplot(data,filename='surfface') #upload to online
+	import plotly.graph_objs as go
+	layout = go.Layout(
+	    title='Gaussian Mixture Model of Chicago Crime',
+	    scene = dict(
+                    xaxis = dict(
+                        title='Latitude'),
+                    yaxis = dict(
+                        title='Longitude'),
+                    zaxis = dict(
+                        title='Probability'),)
+	)
+	fig = go.Figure(data=data, layout=layout)
+	py.plot(fig,filename='GMM.html')  #offline plot
+	pyonline.iplot(fig,filename='GMM') #upload to online
 
 	#do DBscan 
 
@@ -48,7 +60,9 @@ def grids(mean, cov, X, Y):  #make grids of probabilities given guassian data
 
 	probs = multivariate_normal(mean,cov).pdf(coord)
 	P = np.reshape(probs,[resolution, resolution])
-
+	Xmesh = np.flip(Xmesh,1)
+	Ymesh = np.flip(Ymesh,1)
+	P = np.flip(P,1)
 	return [Xmesh, Ymesh, P]
 
 def EM(heatData):   #save EM data
