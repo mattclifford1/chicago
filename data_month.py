@@ -82,13 +82,17 @@ def data_month(num):
         Ptime[i] = Pclean[find[i]]
         Dtime[i] = Dclean[find[i]]
     
-    return Xtime,Ytime,Ptime,Dtime
+    dataCoord = np.array([Xtime,Ytime])
+
+    np.save('dataCoordmonth' + num + '.npy',dataCoord)
+    np.save('severitymonth' + num + '.npy',Ptime)
 
 i = ['01','02','03','04','05','06','07','08','09','10','11','12']
-Dmonthsize = np.zeros(len(i))
+#Dmonthsize = np.zeros(len(i))
 
-for j in range(len(i)):
-    Xtime,Ytime,Ptime,Dtime = data_month(i[j])
-    Dmonthsize[j] = len(Dtime)
+for j in i:
+    data_month(j)
+    #Xtime,Ytime,Ptime,Dtime = data_month(i[j])
+    #Dmonthsize[j] = len(Dtime)
        
-plt.plot(Dmonthsize,'.')
+#plt.plot(Dmonthsize,'.')

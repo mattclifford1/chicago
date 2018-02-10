@@ -2,8 +2,21 @@ import pandas
 import numpy as np
 from tqdm import tqdm
 
-
-def data_time(num):
+def data_data():
+    '''
+    a function that will output the data using panda.read_csv
+    '''
+    #define column names
+    colnames = ['ID', 'Case Number', 'Date', 'Block', 'IUCR','PrimaryType','Description','Location Description','Arrest','Domestic','Beat','District','Ward','Community','FBI Code','XCoordinate','YCoordinate','Year','Updated On','Latitude','Longitude','Location']
+    data = pandas.read_csv('crimes2016.csv', names=colnames)  #extract data
+    
+    return data
+    
+data = data_data()
+    
+    
+    
+def data_time(num,data):
     '''
     function that outputs specific X,Y-coordinates and Primary type of the crime 
     depending on the desired time
@@ -16,10 +29,10 @@ def data_time(num):
     Ytime = Y-Coordinates with respect to all crimes in the specified time
     Ptime = Primary type of crime for all crimes in specified time
     Dtime = Checking if the program worked correctly (i.e. all values of these should be '15' or '09')
-    '''
     #define column names
     colnames = ['ID', 'Case Number', 'Date', 'Block', 'IUCR','PrimaryType','Description','Location Description','Arrest','Domestic','Beat','District','Ward','Community','FBI Code','XCoordinate','YCoordinate','Year','Updated On','Latitude','Longitude','Location']
     data = pandas.read_csv('crimes2016.csv', names=colnames)  #extract data
+    '''
     
     #extract useful columns to lists
     X = data.XCoordinate.tolist()
@@ -79,12 +92,16 @@ def data_time(num):
         Ptime[i] = Pclean[find[i]]
         Dtime[i] = Dclean[find[i]]
     
-    return Xtime,Ytime,Ptime,Dtime
+    dataCoord = np.array([Xtime,Ytime])
+
+    np.save('dataCoordtime' + num + '.npy',dataCoord)
+    np.save('severitytime' + num + '.npy',Ptime)
 
 i = ['00','01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23']
-Dtimesize = np.zeros(len(i))
+#Dtimesize = np.zeros(len(i))
 
-for j in range(len(i)):
-    Xtime,Ytime,Ptime,Dtime = data_time(i[j])
-    Dtimesize[j] = len(Dtime)
+for j in i:
+    data_time(j,data)
+    #Xtime,Ytime,Ptime,Dtime = data_time(i[j],data)
+    #Dtimesize[j] = len(Dtime)
        
