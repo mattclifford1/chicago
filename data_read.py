@@ -11,18 +11,24 @@ X = data.XCoordinate.tolist()
 Y = data.YCoordinate.tolist()
 P = data.PrimaryType.tolist()
 B = data.Ward.tolist()
+La = data.Latitude.tolist()
+Lo = data.Longitude.tolist()
 
 #convert to numpy array for ease of use
 X = np.array(X)
 Y = np.array(Y)
 P = np.array(P)
 B = np.array(B)
+La = np.array(La)
+Lo = np.array(Lo)
 
 #get rid of first column containing string of column name
 X = np.delete(X,0)
 Y = np.delete(Y,0)
 P = np.delete(P,0)
 B = np.delete(B,0)
+La = np.delete(La,0)
+Lo = np.delete(Lo,0)
 
 #get rid of any incomplete 'nan' entries from the data (using indexing for speed instead of deleting)
 dataLen = len(X)
@@ -34,6 +40,8 @@ for i in tqdm(range(len(X))):
 
 Xclean = np.zeros(dataLen)    #define arrays
 Yclean = np.zeros(dataLen)
+Laclean = np.zeros(dataLen)
+Loclean = np.zeros(dataLen)
 Pclean = [0] * dataLen
 
 Beat = np.zeros(dataLen2)
@@ -48,6 +56,8 @@ for i in tqdm(range(len(X))):
         Xclean[ind] = X[i]
         Yclean[ind] = Y[i]
         Pclean[ind] = P[i]
+        Laclean[ind] = La[i]
+        Loclean[ind] = Lo[i]
         BeatClean[ind] = B[i]
         ind += 1
     else:
@@ -59,12 +69,19 @@ for i in tqdm(range(len(X))):
         
 #save arrays
 dataCoord = np.array([Xclean,Yclean])
+LatLong = np.array([Laclean, Loclean])
 
 np.save('dataCoord.npy',dataCoord)
 np.save('severity.npy',Pclean)
 np.save('beats.npy', Beat)
 np.save('beatsClean.npy', BeatClean)
 np.save('severity2.npy', P_delete)
+
+#Save latitude and longitude
+np.save('latLong', LatLong)
+
+
+
 
 
 # import scipy.io
