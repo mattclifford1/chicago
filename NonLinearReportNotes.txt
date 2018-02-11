@@ -1,0 +1,67 @@
+Notes for Non-Linear Paper:(Nonlinear Patterns in Urban Crime: Hotspots, Bifurcations, and Suppression)
+ 
+->existence of supercritical spots and subcritical hotspots created via pitchfork or transcritical bifurcations. (abstract)
+
+->model consisting of two coupled, nonlinear PDEs for crime formation and dynamics (Intro)
+
+->further analysis into bifurcations of steady states mentioned in their previous paper, may need to read previous one? (Intro)
+
+->hotspot policing, interesting analysis on whether police reduces hotspots or simply displacing them (Intro)
+
+->model development for criminal activity, repeat and near-repeat victimization (Background)
+
+->model consinsts of three types of behavious: stationary, transitory or no crime hotspots (Background, Figure 1)
+
+->taking the limit, algebraic details from previous paper, results in their 2 PDE equations, similar to reaction-diffusion equations (Background)
+
+->transitory hotspots may occur through perturbations as a result from linear instability (Background)
+
+->deeper examinations of system using weakly nonlinear analysis (Weakly nonlinear analysis)
+
+->introducing a new parameter such that the state will be linearly stable/unstable depengin on epsilon, unable to be unstable though, invalid for now? (Weakly nonlinear analysis)
+
+->introducing new slow time variable T, making the results valid  (Weakly nonlinear analysis)
+
+->introducing new spatial variable and re-write the PDE equations of the system (Weakly nonlinear analysis)
+
+->restrict domain to [0,L] and impose periodic boundary conditions (1D case)
+
+->due to symmetry pitchfork bifurcation is expected to occur (1D case)
+
+->standard form of pitchfork bifurcation, supercritical or subcritical depending on sign of C1 (1D case)
+
+->adding higher orders of epsilon and defining subsequent slow timescales, will be needed for numerical solutions (1D case)
+
+->consider solutions on disk, Neumann boundary conditions and transcritical bifurcation (2D, radially symmetric case)
+
+->2D system, example with squares, similar analysis with 1D case, pitchfork bifurcation (Fully 2D case)
+
+->subcritical and supercritical pitchforks bifurcations for squares, roll steady state always unstable in increasing Q2 (Fully 2D case)
+
+->hexagons, quadratic nonlinearity, transcritical bifurcations (Fully 2D case)
+
+->hexagonal ring solution not stable, but preferred pattern for small epsilon (Fully 2D case)
+
+->checking analytical results with numerical methods, Newton-Raphson-based solvers (Numerical results)
+
+->good agreement between analytical and numerical results for 1D case, shown in Figure 2, for all epsilon (Numerical results)
+
+->different solution for subcritical system, while it agrees for small epsilon, there is another branch not predicted by initial theory, but can be predicted using higher order epsilon, slight deviation (Numerical results)
+
+->radially symmetric case, analytic theory agrees with numeric for small epsilon but there are values at large amplitude that analytics can not predict. solution grows until it reaches stable, large amplitude branch (Numerical results)
+
+->square 2D case, supercritical system, agreement between numerical and analytical solutions, epsilon very small (Numerical results)
+
+->square 2D case, subcritical system, analytics and numerics match for small epsilon, but stable, large amplitude branch not predicted by theory, the system rapidly approaches that (Numerical results)
+
+->hexagons 2D case, analytics and numerics agree for small epsilon, both large amplitude and secondary bifurcations not predicted by analytical theory. interesting secondary bifurcations for ring branch, unstable solutions. saddle point of ring numerics and analytics diverge in Figure 7(b) (Numerical results)
+
+->if the hotspot is subcritical then hotspot policing will drive attractiveness down below critical unstable branch and destroy the hotspot. if the hotspot is supercritical then hotspot policing will simply displace the hotspot to a nearby area. (Hotspot suppression)
+
+->results observed using simulations, hotspot policing is illustrated by a damping field, re-adjusting PDE system. (Hotspot suppression)
+
+->time lag between information received by police and criminal activity, causing new hotspots to emerge. (Hotspot suppression)
+
+->differences based on simulation results between supressing a subcritical bump or supercritical. eradication of hotspot illustrated on Figure 9, subcritical case. on the other hand, in supercritical case, firstly suppression original hotspots disappear but then surrounding area has other hotspots, so eradication simply caused displacement. (Hotspot suppression)
+
+->large amplitude branches illustrated in numerical analysis may indicate hysteresis in the system, sudden burst of unexpected crime. (Conclusions)
