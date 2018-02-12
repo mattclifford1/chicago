@@ -9,7 +9,7 @@ data = pandas.read_csv('crimes2016.csv', names=colnames)  #extract data
 #extract useful columns to lists
 X = data.XCoordinate.tolist()
 Y = data.YCoordinate.tolist()
-P = data.PrimaryType.tolist()
+P = data.IUCR.tolist()
 
 #convert to numpy array for ease of use
 X = np.array(X)
@@ -43,7 +43,7 @@ for i in tqdm(range(len(X))):
 dataCoord = np.array([Xclean,Yclean])
 
 np.save('dataCoord.npy',dataCoord)
-np.save('severity.npy',Pclean)
+np.save('IUCR.npy',Pclean)
 
 
 # import scipy.io
