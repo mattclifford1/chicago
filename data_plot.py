@@ -77,10 +77,8 @@ def getData():
 	IUCR_Codes.remove('IUCR_Codes')
 	severity.remove('Severity')
 
-	print(IUCR_Codes)
 	for i in range(len(severity)):
 		severity[i] = float(severity[i])
-	print(severity)
 	sev = np.zeros(len(IUCR))
 	#assign severity str to numerical value
 	for i in range(len(IUCR)):
