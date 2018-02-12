@@ -5,29 +5,67 @@ import plotly.offline as py
 import plotly.plotly as pyonline
 def main():
 	X, Y, sev = getData()
-	# reduction = 1000
-	# heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
-	# heatData = heatmapData(heatIm)
+	reduction = 1000
+	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+	heatData = heatmapData(heatIm)
 
-	#do EM
+	from sklearn.cluster import KMeans
+	# Nc = np.arange(1, 100)
+	# score = [0]*(len(Nc))
+	# for i in Nc:
+	# 	print(i)
+	# 	kM = KMeans(n_clusters=i).fit(heatIm)
+	# 	score[i-1] = kM.inertia_       #Sum of squared distances of samples to their closest cluster center.
+
+	# plt.clf()
+	# plt.plot(Nc,score)
+	# plt.title('K means error with varying number of clusters')
+	# plt.xlabel('Number of clusters')
+	# plt.ylabel('Error')
+	# plt.show()
+
+	# do k means
+	nC = 10
+	kM = KMeans(n_clusters=nC).fit(heatData)
+	m = kM.cluster_centers_
+	labels = kM.labels_
+	means = [0]*nC
+	cov = [0]*nC
+	for i in range(nC):
+		occ = (labels == i).sum()
+		data = [0]*occ
+		count = 0 
+		for k in range(heatData.shape[0]):
+			if labels[k] == i:
+				data[count] = heatData[k,:]
+				count += 1
+		means[i-1] = np.mean(data, axis=0)
+		cov[i-1] = np.cov(np.array(data).T)
+	# plt.clf()
+	# plt.plot(m[:,1],m[:,0],'x')
+	# plt.show()
+	# #do EM
 	# EM(heatData)
 
-	#load guassian data computed from EM - need to have run EM before to have saved file
-	means = np.load('means.npy')
-	cov = np.load('cov.npy')
+	# #load guassian data computed from EM - need to have run EM before to have saved file
+	# means = np.load('means.npy')
+	# cov = np.load('cov.npy')
 
 	#make list of each guassian as np.array
-	G = [0]*means.shape[0]    #initialise
-	for i in range(means.shape[0]):
-		G[i] = grids(means[i,:], cov[i,:,:], X, Y)
+	# means = np.array(means)
+	# cov = np.array(cov)
+	me = np.array(means)
+	G = [0]*me.shape[0]    #initialise
+	for i in range(me.shape[0]):
+		G[i] = grids(means[i], cov[i], X, Y)
 	#make guassan data into format plotly takes
-	data = [0]*means.shape[0]
-	for x in range(means.shape[0]):
+	data = [0]*me.shape[0]
+	for x in range(me.shape[0]):
 		data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
 	#plot
 	import plotly.graph_objs as go
 	layout = go.Layout(
-	    title='Gaussian Mixture Model of Chicago Crime',
+	    title='Gaussian Mixture Model of Chicago Crime - K means',
 	    scene = dict(
                     xaxis = dict(
                         title='Latitude'),
@@ -37,8 +75,8 @@ def main():
                         title='Probability'),)
 	)
 	fig = go.Figure(data=data, layout=layout)
-	py.plot(fig,filename='GMM.html')  #offline plot
-	pyonline.iplot(fig,filename='GMM') #upload to online
+	py.plot(fig,filename='kmeans10.html')  #offline plot
+	# pyonline.iplot(fig,filename='kmeans') #upload to online
 
 	#do DBscan 
 
