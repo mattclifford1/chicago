@@ -12,25 +12,25 @@ def main():
 	print('severity at (' + str(x1)+', ' + str(y1) +') is: ' + str(sevNorm))
 	heatData = heatmapData(heatIm)
 
-	from sklearn import mixture
-	# gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
-	c =17
-	gmm = mixture.GaussianMixture(n_components=c).fit(heatData)
+	# from sklearn import mixture
+	# # gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
+	# c =17
+	# gmm = mixture.GaussianMixture(n_components=c).fit(heatData)
 
-	#do 3d plot
-	from matplotlib import cm
-	from mpl_toolkits.mplot3d import Axes3D
-	from scipy.stats import multivariate_normal
-	plt.clf()
-	fig=plt.figure();
-	# ax=fig.add_subplot(111,projection='3d')
-	ax=fig.add_subplot(111)
+	# #do 3d plot
+	# from matplotlib import cm
+	# from mpl_toolkits.mplot3d import Axes3D
+	# from scipy.stats import multivariate_normal
+	# plt.clf()
+	# fig=plt.figure();
+	# # ax=fig.add_subplot(111,projection='3d')
+	# ax=fig.add_subplot(111)
 
-	for i in range(c):
-		plot3dGauss(gmm.means_[i,:], gmm.covariances_[i,:,:], ax, X, Y)
+	# for i in range(c):
+	# 	plot3dGauss(gmm.means_[i,:], gmm.covariances_[i,:,:], ax, X, Y)
 
 	
-	plt.show()
+	# plt.show()
 	# sio.savemat('np_xector.mat', {'xect':coord})
 	# labels = gmm.predict(heatData)
 	# # means = hmm.means
@@ -68,8 +68,8 @@ def getData():
 
 	#lookup of numberal equivelant (should be done in a dict really)
 	import pandas
-	colnames = ['IUCR_Codes','Primary_Type','Secondary_Type','Felony_Class','Severity']
-	data = pandas.read_csv('SeverityData.csv', names=colnames)  #extract data
+	colnames = ['IUCR_Codes','Primary_Type','Secondary_Type','Felony_Class','Maximum','Minimum','Mean_Sentence','Severity']
+	data = pandas.read_csv('AllSeverityData.csv', names=colnames)  #extract data
 
 	IUCR_Codes = data.IUCR_Codes.tolist()
 	severity = data.Severity.tolist()
@@ -106,8 +106,9 @@ def makeHeatmap(X, Y, sev, data_reduce):
 
 	#sum severities for image locations, n.b. x axis has to be flipped to match image coordinates
 	for i in range(len(X)):
-		heatIm[abs(int(y_shift[i])-heatIm.shape[0]+1), int(x_shift[i])] += int(sev[i]*10)
+		heatIm[abs(int(y_shift[i])-heatIm.shape[0]+1), int(x_shift[i])] += sev[i]*10
 
+	# heatIm = heatIm/np.max(heatIm)
 	#plot and save image
 	plt.imshow(heatIm,cmap='hot')
 	plt.xticks([])
