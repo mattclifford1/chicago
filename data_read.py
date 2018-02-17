@@ -9,7 +9,7 @@ data = pandas.read_csv('crimes2016.csv', names=colnames)  #extract data
 #extract useful columns to lists
 X = data.XCoordinate.tolist()
 Y = data.YCoordinate.tolist()
-P = data.PrimaryType.tolist()
+P = data.IUCR.tolist()
 B = data.Ward.tolist()
 La = data.Latitude.tolist()
 Lo = data.Longitude.tolist()
@@ -72,7 +72,7 @@ dataCoord = np.array([Xclean,Yclean])
 LatLong = np.array([Laclean, Loclean])
 
 np.save('dataCoord.npy',dataCoord)
-np.save('severity.npy',Pclean)
+np.save('IUCR.npy',Pclean)
 np.save('beats.npy', Beat)
 np.save('beatsClean.npy', BeatClean)
 np.save('severity2.npy', P_delete)
