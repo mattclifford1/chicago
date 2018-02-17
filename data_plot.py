@@ -47,13 +47,13 @@ for i in range(len(X)):
 #Image background
 img = imread('chicago_image.jpg')
 #Adjust left, right, bottom, down coordinates or something
-#plt.imshow(img, zorder=0, extent=[0, 109, 138, 0])
+plt.imshow(img, zorder=0, extent=[0, 109, 138, 0])
 
 
 
 #plot and save image
 #Alpha adjusts transparency
-plt.imshow(heatIm, zorder=1, cmap='hot', alpha=1)
+plt.imshow(heatIm, zorder=1, cmap='hot', alpha=0.8)
 plt.xticks([])
 plt.yticks([])
 plt.savefig('heatmap.png')

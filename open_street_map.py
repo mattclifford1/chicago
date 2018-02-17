@@ -13,19 +13,29 @@ gmaps.configure(api_key="AIzaSyCmrMmc8SKB8SBpGs42gxUfOy14s2UbGe8") # Your Google
 dataCoord = np.load('latLong.npy')    #load coordinate data
 X = dataCoord[0,:]                      #and separate
 Y = dataCoord[1,:]
-sevStr = np.load('severity.npy')        #load severity
 
+IUCR = np.load('IUCR.npy')        #load severity
 #lookup of numberal equivelant (should be done in a dict really)
-primary = ['ARSON', 'ASSAULT', 'BATTERY','BURGLARY','CONCEALED CARRY LICENSE VIOLATION','CRIM SEXUAL ASSAULT','CRIMINAL DAMAGE','CRIMINAL TRESPASS','DECEPTIVE PRACTICE','GAMBLING','HOMICIDE','HUMAN TRAFFICKING','INTERFERENCE WITH PUBLIC OFFICER','INTIMIDATION','KIDNAPPING','LIQUOR LAW VIOLATION','MOTOR VEHICLE THEFT','NARCOTICS','OBSCENITY','OFFENSE INVOLVING CHILDREN','OTHER NARCOTIC VIOLATION','OTHER OFFENSE','PROSTITUTION','PUBLIC INDECENCY','PUBLIC PEACE VIOLATION', 'ROBBERY','SEX OFFENSE','STALKING','THEFT','WEAPONS VIOLATION','NON-CRIMINAL']
-severity = [0.5,0.72,0.89,0.44,0.11,0.94,0.28,0.11,0.44,0.11,0.94,1.0,0.11,0.22,1.0,0.11,0.17,0.22,0.11,0.89,0.22,0.11,0.17,0.11,0.22,0.94,0.94,0.67,0.17,0.22,0]
+import pandas
+colnames = ['IUCR_Codes','Primary_Type','Secondary_Type','Felony_Class','Maximum','Minimum','Mean_Sentence','Severity']
+data = pandas.read_csv('AllSeverityData.csv', names=colnames)  #extract data
+IUCR_Codes = data.IUCR_Codes.tolist()
+severity = data.Severity.tolist()
+IUCR_Codes.remove('IUCR_Codes')
+severity.remove('Severity')
 
-sev = np.zeros(len(sevStr))
+for i in range(len(severity)):
+	severity[i] = float(severity[i])
+sev = np.zeros(len(IUCR))
+
+
 #assign severity str to numerical value
-for i in range(len(sevStr)):
-	ind = primary.index(sevStr[i])
+for i in range(len(IUCR)):
+	ind = IUCR_Codes.index(IUCR[i])
 	sev[i] = severity[ind]
-
-
+    
+    
+    
 dataCoord = np.transpose(dataCoord)
 fig = gmaps.figure()
 fig.add_layer(gmaps.heatmap_layer(dataCoord))
