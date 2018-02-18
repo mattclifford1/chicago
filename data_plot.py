@@ -6,6 +6,7 @@ dataCoord = np.load('dataCoord.npy')    #load coordinate data
 X = dataCoord[0,:]                      #and separate
 Y = dataCoord[1,:]
 IUCR = np.load('IUCR.npy')        #load severity
+
 #lookup of numberal equivelant (should be done in a dict really)
 import pandas
 colnames = ['IUCR_Codes','Primary_Type','Secondary_Type','Felony_Class','Maximum','Minimum','Mean_Sentence','Severity']

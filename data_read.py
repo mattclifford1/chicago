@@ -13,6 +13,7 @@ P = data.IUCR.tolist()
 B = data.Ward.tolist()
 La = data.Latitude.tolist()
 Lo = data.Longitude.tolist()
+A = data.Arrest.tolist()
 
 #convert to numpy array for ease of use
 X = np.array(X)
@@ -21,6 +22,7 @@ P = np.array(P)
 B = np.array(B)
 La = np.array(La)
 Lo = np.array(Lo)
+A = np.array(A)
 
 #get rid of first column containing string of column name
 X = np.delete(X,0)
@@ -29,6 +31,7 @@ P = np.delete(P,0)
 B = np.delete(B,0)
 La = np.delete(La,0)
 Lo = np.delete(Lo,0)
+A = np.delete(A,0)
 
 #get rid of any incomplete 'nan' entries from the data (using indexing for speed instead of deleting)
 dataLen = len(X)
@@ -43,6 +46,7 @@ Yclean = np.zeros(dataLen)
 Laclean = np.zeros(dataLen)
 Loclean = np.zeros(dataLen)
 Pclean = [0] * dataLen
+Aclean = [0] * dataLen
 
 Beat = np.zeros(dataLen2)
 BeatClean = np.zeros(dataLen)
@@ -59,6 +63,7 @@ for i in tqdm(range(len(X))):
         Laclean[ind] = La[i]
         Loclean[ind] = Lo[i]
         BeatClean[ind] = B[i]
+        Aclean[ind] = A[i]
         ind += 1
     else:
         Beat[ind2] = B[i]
@@ -76,6 +81,7 @@ np.save('IUCR.npy',Pclean)
 np.save('beats.npy', Beat)
 np.save('beatsClean.npy', BeatClean)
 np.save('severity2.npy', P_delete)
+np.save('arrests.npy', Aclean)
 
 #Save latitude and longitude
 np.save('latLong', LatLong)
