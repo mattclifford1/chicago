@@ -1,6 +1,7 @@
 import pandas
 import numpy as np
 from tqdm import tqdm
+import scipy.io
 
 def data_data():
     '''
@@ -92,11 +93,12 @@ def data_time(num,data):
         Ptime[i] = Pclean[find[i]]
         Dtime[i] = Dclean[find[i]]
     
-    dataCoord = np.array([Xtime,Ytime])
+    #dataCoord = np.array([Xtime,Ytime])
 
-    np.save('dataCoordtime' + num + '.npy',dataCoord)
-    np.save('severitytime' + num + '.npy',Ptime)
-
+    #np.save('dataCoordtime' + num + '.npy',dataCoord)
+    #np.save('severitytime' + num + '.npy',Ptime)
+    vect = Dtime
+    scipy.io.savemat('time' + num + '.mat',{'vect':vect})
 i = ['00','01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23']
 #Dtimesize = np.zeros(len(i))
 

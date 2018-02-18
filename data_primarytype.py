@@ -7,14 +7,14 @@ colnames = ['ID', 'Case Number', 'Date', 'Block', 'IUCR','PrimaryType','Descript
 data = pandas.read_csv('crimes2016.csv', names=colnames)  #extract data
 
 #extract useful columns to lists
-X = data.PrimaryType.tolist()
+X = data.IUCR.tolist()
 
 #sort alphabetically the unique values of primary type list
 Y = sorted(list(set(X)))
 
 #get rid of first column containing string of column name
-Y.remove('PrimaryType')
-X.remove('PrimaryType')
+Y.remove('IUCR')
+X.remove('IUCR')
 
 #finding the index of a specific crime primary type
 X = np.array(X)
