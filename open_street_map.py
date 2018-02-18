@@ -1,4 +1,4 @@
-#IMPORTANT -- THIS MUST BE RUN IN JUPYTER NOTEBOOK ONLINE IN ORDER TO DISPLAY HEATMAP
+    §#IMPORTANT -- THIS MUST BE RUN IN JUPYTER NOTEBOOK ONLINE IN ORDER TO DISPLAY HEATMAP
 #THIS IS SINCE IT REQUIRES JUPYTER WIDGETS
 
 import gmaps
@@ -38,5 +38,5 @@ for i in range(len(IUCR)):
     
 dataCoord = np.transpose(dataCoord)
 fig = gmaps.figure()
-fig.add_layer(gmaps.heatmap_layer(dataCoord))
+fig.add_layer(gmaps.heatmap_layer(dataCoord, weights= sev))
 fig
