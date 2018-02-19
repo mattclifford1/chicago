@@ -9,7 +9,7 @@ def main():
 	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
 	heatData = heatmapData(heatIm)
 
-	from sklearn.cluster import KMeans
+	from sklearn.cluster import KMeans , DBSCAN
 	# Nc = np.arange(1, 100)
 	# score = [0]*(len(Nc))
 	# for i in Nc:
@@ -26,11 +26,16 @@ def main():
 
 	# do k means
 	nC = 10
-	kM = KMeans(n_clusters=nC).fit(heatData)
-	m = kM.cluster_centers_
+	print('doing DBSCAN...')
+	kM = DBSCAN(n_jobs = -1).fit(heatData)
+	print('DBSCAN complete\n')
+	# m = kM.cluster_centers_
 	labels = kM.labels_
+	nC = len(labels)
+	print(str(nC)+ ' clusters')
 	means = [0]*nC
 	cov = [0]*nC
+
 	for i in range(nC):
 		occ = (labels == i).sum()
 		data = [0]*occ
@@ -55,6 +60,7 @@ def main():
 	# means = np.array(means)
 	# cov = np.array(cov)
 	me = np.array(means)
+	print('plotting')
 	G = [0]*me.shape[0]    #initialise
 	for i in range(me.shape[0]):
 		G[i] = grids(means[i], cov[i], X, Y)
