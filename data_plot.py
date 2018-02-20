@@ -54,7 +54,7 @@ plt.imshow(img, zorder=0, extent=[0, 109, 138, 0])
 
 #plot and save image
 #Alpha adjusts transparency
-plt.imshow(heatIm, zorder=1, cmap='hot', alpha=0.8)
+plt.imshow(heatIm, zorder=1, cmap='hot', alpha=0.9)
 plt.xticks([])
 plt.yticks([])
 plt.savefig('heatmap.png')
