@@ -5,9 +5,9 @@ import plotly.offline as py
 import plotly.plotly as pyonline
 def main():
 	X, Y, sev = getData()
-	# reduction = 1000
-	# heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
-	# heatData = heatmapData(heatIm)
+	reduction = 1000
+	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+	heatData = heatmapData(heatIm)
 
 	#do EM
 	# EM(heatData)
@@ -15,15 +15,19 @@ def main():
 	#load guassian data computed from EM - need to have run EM before to have saved file
 	means = np.load('means.npy')
 	cov = np.load('cov.npy')
-
+	print(str(means.shape[0]) + ' clusters')
 	#make list of each guassian as np.array
 	G = [0]*means.shape[0]    #initialise
 	for i in range(means.shape[0]):
 		G[i] = grids(means[i,:], cov[i,:,:], X, Y)
 	#make guassan data into format plotly takes
-	data = [0]*means.shape[0]
+	# data = [0]*means.shape[0]
+
+	P = np.zeros([G[1][2].shape[0],G[1][2].shape[1]])
 	for x in range(means.shape[0]):
-		data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
+		# data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
+		P +=  G[x][2]
+	data = [{'x':G[1][0],'y':G[1][1],'z':P, 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=10)}]
 	#plot
 	import plotly.graph_objs as go
 	layout = go.Layout(
@@ -67,7 +71,15 @@ def grids(mean, cov, X, Y):  #make grids of probabilities given guassian data
 
 def EM(heatData):   #save EM data
 	from sklearn import mixture
-	gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
+	print('doing EM...')
+	gmm = mixture.BayesianGaussianMixture(
+		n_components=25,
+		tol=0.00001,
+		init_params='kmeans',
+		weight_concentration_prior = 0.000000000000001,
+		weight_concentration_prior_type='dirichlet_process', 
+		max_iter = 5000
+	).fit(heatData)
 	# gmm = mixture.GaussianMixture(n_components=###).fit(heatData)
 	np.save('means.npy',gmm.means_)
 	np.save('cov.npy',gmm.covariances_)
@@ -76,18 +88,26 @@ def getData():
 	dataCoord = np.load('dataCoord.npy')    #load coordinate data
 	X = dataCoord[0,:]                      #and separate
 	Y = dataCoord[1,:]
-	sevStr = np.load('severity.npy')        #load severity
+	IUCR = np.load('IUCR.npy')        #load severity
 
 	#lookup of numberal equivelant (should be done in a dict really)
-	primary = ['ARSON', 'ASSAULT', 'BATTERY','BURGLARY','CONCEALED CARRY LICENSE VIOLATION','CRIM SEXUAL ASSAULT','CRIMINAL DAMAGE','CRIMINAL TRESPASS','DECEPTIVE PRACTICE','GAMBLING','HOMICIDE','HUMAN TRAFFICKING','INTERFERENCE WITH PUBLIC OFFICER','INTIMIDATION','KIDNAPPING','LIQUOR LAW VIOLATION','MOTOR VEHICLE THEFT','NARCOTICS','OBSCENITY','OFFENSE INVOLVING CHILDREN','OTHER NARCOTIC VIOLATION','OTHER OFFENSE','PROSTITUTION','PUBLIC INDECENCY','PUBLIC PEACE VIOLATION', 'ROBBERY','SEX OFFENSE','STALKING','THEFT','WEAPONS VIOLATION','NON-CRIMINAL']
-	severity = [0.5,0.72,0.89,0.44,0.11,0.94,0.28,0.11,0.44,0.11,0.94,1.0,0.11,0.22,1.0,0.11,0.17,0.22,0.11,0.89,0.22,0.11,0.17,0.11,0.22,0.94,0.94,0.67,0.17,0.22,0]
+	import pandas
+	colnames = ['IUCR_Codes','Primary_Type','Secondary_Type','Felony_Class','Maximum','Minimum','Mean_Sentence','Severity']
+	data = pandas.read_csv('AllSeverityData.csv', names=colnames)  #extract data
 
-	sev = np.zeros(len(sevStr))
+	IUCR_Codes = data.IUCR_Codes.tolist()
+	severity = data.Severity.tolist()
+
+	IUCR_Codes.remove('IUCR_Codes')
+	severity.remove('Severity')
+
+	for i in range(len(severity)):
+		severity[i] = float(severity[i])
+	sev = np.zeros(len(IUCR))
 	#assign severity str to numerical value
-	for i in range(len(sevStr)):
-		ind = primary.index(sevStr[i])
+	for i in range(len(IUCR)):
+		ind = IUCR_Codes.index(IUCR[i])
 		sev[i] = severity[ind]
-	sev = sev/(np.max(sev)) #normalise
 	return X, Y, sev
 
 def makeHeatmap(X, Y, sev, data_reduce):
@@ -117,7 +137,7 @@ def makeHeatmap(X, Y, sev, data_reduce):
 	plt.xticks([])
 	plt.yticks([])
 	plt.savefig('heatmap.png')
-	print('saved')
+	# print('saved')
 	# plt.clf()
 	return heatIm, x_min, y_min
 
