@@ -8,43 +8,48 @@ def main():
 	partitions = 4
 	for i in range(partitions):
 		X, Y, sev, X_test, Y_test, sev_test = getData(i,partitions)
-		reduction = 1000
 
-		heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
-		testHeatIm, x_min, y_min = makeHeatmap(X_test, Y_test, sev_test, reduction)
-
-		heatData = heatmapData(heatIm)
+		sevData = gmmData(X, Y, sev)
+		testData = gmmData(X_test, Y_test, sev_test)
 		######normalise heatmap and GMM, then compare closeness of the two
-
+		reduction = 1000
+		heatIm = makeHeatmap(X, Y, sev,reduction,0, False)
+		s = heatIm.shape
+		heatImTest = makeHeatmap(X_test, Y_test, sev_test, reduction,s,True)
 		#do EM
-		# EM(heatData, i)
-
+		# EM(sevData,n_components=5,i=i)
+		print('done')
 		#load guassian data computed from EM - need to have run EM before to have saved file
 		means = np.load('gauss_data/means'+str(i) + '.npy')
 		cov = np.load('gauss_data/cov'+str(i) + '.npy')
+		print(str(means.shape[0]) + ' clusters')
 
-		G = plot3d(means, cov, X, Y, heatIm, plot = False)
+		P = plot3d(means, cov, X, Y, plot = False, shape = s)
 
-		gLen = means.shape[0]
-		normHeatIm = heatIm/np.max(heatIm)
-		normHeatIm = np.flip(normHeatIm,1)
-
-		normTestHeatIm = heatIm/np.max(testHeatIm)
-		normTestHeatIm = np.flip(normTestHeatIm,1)
+		normTrain = heatIm/np.max(heatIm)
+		normTest = heatImTest/np.max(heatImTest)
+		# normTestData = np.flip(normHeatIm,1)
 
 		selfError = 0 
 		testError = 0
-		for x in range(heatIm.shape[0]):
-			for y in range(heatIm.shape[1]):
-				coord = [x,y]
-				heat01 = returnHeatData(normHeatIm,coord)
-				testHeat01 = returnHeatData(normTestHeatIm,coord)
-				gmm01 = returnMaxProb(G, gLen, coord)
-				selfError += abs(heat01 - gmm01)   # could use squared error??
-				testError += abs(testHeat01 - gmm01)
+		import tqdm
+		for x in tqdm.tqdm(range(s[0])):
+			for y in range(s[1]):
+				# heat01 = returnHeatData(normHeatIm,coord)
+				# testHeat01 = returnHeatData(normTestHeatIm,coord)
+				# gmm01 = returnMaxProb(G, gLen, coord)
+				selfError += abs(normTrain[x,y] - P[x,y])   # could use squared error??
+				testError += abs(normTest[x,y] - P[x,y])
+
 		print('self error '+str(i)+': '+ str(selfError))
 		print('test error '+str(i)+': '+ str(testError) + '\n')
-	#do DBscan 
+######################################
+# def main():
+# 	X, Y, sev, X_test, Y_test, sev_test = getData(0,part=4)
+# 	print(len(X))
+# 	print(len(X_test))
+# 	plt.plot(X,Y,'.')
+# 	plt.show()
 def returnHeatData(normHeatIm, coord):
 	return normHeatIm[coord[0],coord[1]]
 
@@ -57,45 +62,48 @@ def returnMaxProb(G, gLen, coord):
 		# plt.show()
 	return np.max(p_s)
 
-def plot3d(means, cov,X, Y, heatIm, plot):
+def plot3d(means, cov, X, Y, plot, shape):
 	#make list of each guassian as np.array
 	G = [0]*means.shape[0]    #initialise
-	maxP = 0 
 	for i in range(means.shape[0]):
-		G[i], newMaxP = grids(means[i,:], cov[i,:,:], X, Y, heatIm)
-		if newMaxP > maxP:
-			maxP = np.copy(newMaxP)
-	#normalise
-	for x in range(means.shape[0]):
-		G[x][2] = G[x][2]/maxP
+		G[i] = grids(means[i,:], cov[i,:,:], X, Y, shape)
 	#make guassan data into format plotly takes
-	data = [0]*means.shape[0]
+	# data = [0]*means.shape[0]
+
+	P = np.zeros([G[0][2].shape[0],G[0][2].shape[1]])
 	for x in range(means.shape[0]):
-		data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
+		# data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
+		P +=  G[x][2]
+
+	P = P/np.max(P) #normalise
+	data = [{'x':G[0][0],'y':G[0][1],'z':P, 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=10)}]
 	#plot
 	import plotly.graph_objs as go
 	layout = go.Layout(
 	    title='Gaussian Mixture Model of Chicago Crime',
 	    scene = dict(
                     xaxis = dict(
-                        title='Latitude'),
+                        title='X'),
                     yaxis = dict(
-                        title='Longitude'),
+                        title='Y'),
                     zaxis = dict(
-                        title='Probability'),)
+                        title='Z'),)
 	)
 	if plot == True:
 		fig = go.Figure(data=data, layout=layout)
 		py.plot(fig,filename='GMM.html')  #offline plot
-		pyonline.iplot(fig,filename='GMM') #upload to online
-	return G
+		# pyonline.iplot(fig,filename='GMM') #upload to online
+	return P
 
-def grids(mean, cov, X, Y, heatIm):  #make grids of probabilities given guassian data
+def grids(mean, cov, X, Y, shape):  #make grids of probabilities given guassian data
 	from scipy.stats import multivariate_normal
-	resolution = 100
-	# Xmesh,Ymesh = np.meshgrid(np.linspace(np.min(X),np.max(X),resolution),np.linspace(np.min(Y),np.max(Y),resolution))
-	Xmesh,Ymesh = np.meshgrid(np.linspace(0,112,resolution),np.linspace(0,139,resolution))
-	Xmesh,Ymesh = np.meshgrid(np.arange(0,heatIm.shape[0]),np.arange(0,heatIm.shape[1]))  #change this hard code
+	resolutionX = np.max(X) - np.min(X)
+	resolutionX = shape[0]
+	resolutionY = np.max(Y) - np.min(Y)
+	resolutionY = shape[1]
+	# resolution = 100
+	Xmesh,Ymesh = np.meshgrid(np.linspace(0,np.max(X),resolutionX),np.linspace(0,np.max(Y),resolutionY))
+	# Xmesh,Ymesh = np.meshgrid(np.linspace(0,112,resolution),np.linspace(0,139,resolution))
 	Xmesh = np.transpose(Xmesh)
 	Ymesh = np.transpose(Ymesh)
 
@@ -108,17 +116,25 @@ def grids(mean, cov, X, Y, heatIm):  #make grids of probabilities given guassian
 			count += 1
 
 	probs = multivariate_normal(mean,cov).pdf(coord)
-	P = np.reshape(probs,[heatIm.shape[0], heatIm.shape[1]])
-	Xmesh = np.flip(Xmesh,1)
-	Ymesh = np.flip(Ymesh,1)
-	P = np.flip(P,1)
-	maxP = np.max(P)
-	return [Xmesh, Ymesh, P], maxP
+	P = np.reshape(probs,[resolutionX, resolutionY])
+	# Xmesh = np.flip(Xmesh,1)
+	# Ymesh = np.flip(Ymesh,1)
+	# P = np.flip(P,1)
 
-def EM(heatData, i):   #save EM data
+	return [Xmesh, Ymesh, P]
+
+def EM(heatData, n_components, i):   #save EM data
 	from sklearn import mixture
-	# gmm = mixture.BayesianGaussianMixture(n_components=20).fit(heatData)
-	gmm = mixture.GaussianMixture(n_components=17).fit(heatData)
+	print('doing EM...')
+	# gmm = mixture.BayesianGaussianMixture(
+	# 	n_components=n_components,
+	# 	tol=0.001,
+	# 	init_params='kmeans',
+	# 	weight_concentration_prior = 0.000001,
+	# 	weight_concentration_prior_type='dirichlet_process', 
+	# 	max_iter = 1000
+	# ).fit(heatData)
+	gmm = mixture.GaussianMixture(n_components=n_components).fit(heatData)
 	np.save('gauss_data/means'+str(i) + '.npy',gmm.means_)
 	np.save('gauss_data/cov'+str(i) + '.npy',gmm.covariances_)
 
@@ -129,18 +145,27 @@ def getData(it,part):   #get certain partition of the data
 	dataCoord = np.load('dataCoord.npy')    #load coordinate data
 	X = dataCoord[0,:]                      #and separate
 	Y = dataCoord[1,:]
-	sevStr = np.load('severity.npy')        #load severity
+	IUCR = np.load('IUCR.npy')        #load severity
 
 	#lookup of numberal equivelant (should be done in a dict really)
-	primary = ['ARSON', 'ASSAULT', 'BATTERY','BURGLARY','CONCEALED CARRY LICENSE VIOLATION','CRIM SEXUAL ASSAULT','CRIMINAL DAMAGE','CRIMINAL TRESPASS','DECEPTIVE PRACTICE','GAMBLING','HOMICIDE','HUMAN TRAFFICKING','INTERFERENCE WITH PUBLIC OFFICER','INTIMIDATION','KIDNAPPING','LIQUOR LAW VIOLATION','MOTOR VEHICLE THEFT','NARCOTICS','OBSCENITY','OFFENSE INVOLVING CHILDREN','OTHER NARCOTIC VIOLATION','OTHER OFFENSE','PROSTITUTION','PUBLIC INDECENCY','PUBLIC PEACE VIOLATION', 'ROBBERY','SEX OFFENSE','STALKING','THEFT','WEAPONS VIOLATION','NON-CRIMINAL']
-	severity = [0.5,0.72,0.89,0.44,0.11,0.94,0.28,0.11,0.44,0.11,0.94,1.0,0.11,0.22,1.0,0.11,0.17,0.22,0.11,0.89,0.22,0.11,0.17,0.11,0.22,0.94,0.94,0.67,0.17,0.22,0]
+	import pandas
+	colnames = ['IUCR_Codes','Primary_Type','Secondary_Type','Felony_Class','Maximum','Minimum','Mean_Sentence','Severity_Normalised','Severity_Rounded','Severity_Scaled']
+	data = pandas.read_csv('AllSeverityData2.csv', names=colnames)  #extract data
 
-	sev = np.zeros(len(sevStr))
+	IUCR_Codes = data.IUCR_Codes.tolist()
+	severity = data.Severity_Scaled.tolist()
+
+	IUCR_Codes.remove('IUCR_Codes')
+	severity.remove('Severity_Scaled')
+
+	for i in range(len(severity)):
+		severity[i] = float(severity[i])
+	sev = np.zeros(len(IUCR))
 	#assign severity str to numerical value
-	for i in range(len(sevStr)):
-		ind = primary.index(sevStr[i])
+	for i in range(len(IUCR)):
+		ind = IUCR_Codes.index(IUCR[i])
 		sev[i] = severity[ind]
-	sev = sev/(np.max(sev)) #normalise
+
 	#split train and test 
 	lower = int((it*len(X))/part)
 	upper = int(((it+1)*len(X))/part)
@@ -154,34 +179,26 @@ def getData(it,part):   #get certain partition of the data
 
 	return X_train, Y_train, sev_train, X_test, Y_test, sev_test
 
-def makeHeatmap(X, Y, sev, data_reduce):
-	#reduce data size
-	X = X/data_reduce
-	Y = Y/data_reduce
+def makeHeatmap(X, Y, sev, red, size, test):
 
-	#find min and 'width' for image space
-	x_min = np.min(X)
-	y_min = np.min(Y)
-	x_len = np.max(X) - x_min
-	y_len = np.max(Y) - y_min
-
-	#shift to [0,0] to save figure space
-	x_shift = X - x_min
-	y_shift = Y - y_min
+	X = X/red
+	Y = Y/red
 
 	#define image size
-	heatIm =  np.zeros([int(np.ceil((y_len+1))), int(np.ceil((x_len+1)))], dtype=np.uint16)
-
+	if test == False:
+		heatIm =  np.zeros([int(np.ceil((np.max(X)))), int(np.ceil((np.max(Y+1))))])
+	else:
+		heatIm = np.zeros([size[0],size[1]])
 	#sum severities for image locations, n.b. x axis has to be flipped to match image coordinates
 	for i in range(len(X-1)):
-		heatIm[abs(int(y_shift[i])-heatIm.shape[0]+1), int(x_shift[i])] += int(sev[i]*10)
-
-	#plot and save image
-	plt.imshow(heatIm,cmap='hot')
-	plt.xticks([])
-	plt.yticks([])
-	plt.savefig('heatmap.png')
-	return heatIm, x_min, y_min
+		heatIm[int(X[i]-1), int(Y[i]-1)] += int(sev[i])
+	# from tqdm import tqdm
+	# for i in tqdm(range(heatIm.shape[0])):
+	# 	for j in range(heatIm.shape[1]):
+	# 		if heatIm[i,j] > 0:
+	# 			plt.plot(i,j,'.')
+	# plt.show()
+	return heatIm
 
 def getSev(x1, y1, heatIm, data_reduce, x_min, y_min):  #x and y are point from original scaling from chicago data set
 	x1 = x1/data_reduce
@@ -194,6 +211,21 @@ def getSev(x1, y1, heatIm, data_reduce, x_min, y_min):  #x and y are point from 
 	maxSev = np.max(heatIm)
 	sevNorm = sev1/maxSev
 	return sevNorm
+
+def gmmData(X, Y, sev):      #increases occurancy due to severity
+	data_points = int(sum(sev))
+	# data_points = int(len(X))
+	data = np.zeros([data_points,2])
+	count = 0 
+	for i in range(len(X)):
+	# for i in range(10000):
+		units = int(sev[i])
+		# units = int(1)
+		for k in range(units):
+			data[count,0] = X[i]
+			data[count,1] = Y[i]
+			count += 1
+	return data
 
 def heatmapData(heatIm):    #converts pixels to crime data points of the heatmap
 	data_points = sum(sum(heatIm))   #number of crime units
