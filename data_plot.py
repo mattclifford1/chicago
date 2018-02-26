@@ -25,30 +25,30 @@ def main():
 	if mixture == True:
 		sevData = np.load('sevData.npy')
 		# #do EM
-		EM(sevData,n_components=20)
+		EM(sevData,n_components=300)
 
-	# 	n_components = np.arange(1, 60)
-	# 	n_components = [220]
-	# 	n_components = [130]
-	# 	from sklearn import mixture
-	# 	models = [0]*len(n_components)
-	# 	count = 0
-	# 	for n in n_components:
-	# 		models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
-	# 		print('done '+ str(n))
-	# 		count+=1
-	# 	# models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
+		# n_components = np.arange(1, 60)
+		# n_components = [160]
+		# # n_components = [160]
+		# from sklearn import mixture
+		# models = [0]*len(n_components)
+		# count = 0
+		# for n in n_components:
+		# 	models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
+		# 	print('done '+ str(n))
+		# 	count+=1
+		# # models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
 		
-	# 	plt.clf()
-	# 	plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
-	# 	plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
-	# 	for m in models:
-	# 		print(m.bic(sevData))
-	# 		print(m.aic(sevData))
-	# 	plt.legend(loc='best')
-	# 	plt.xlabel('n_components full')
-	# 	np.save('modelsFull220.npy',models)
-	# 	# plt.show()
+		# plt.clf()
+		# plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
+		# plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
+		# for m in models:
+		# 	print(m.bic(sevData))
+		# 	print(m.aic(sevData))
+		# plt.legend(loc='best')
+		# plt.xlabel('n_components full')
+		# np.save('modelsFull160.npy',models)
+		# plt.show()
 	# models = np.load('modelsFull50200.npy')
 	# gmm = models[3]
 	# np.save('means.npy',gmm.means_)
@@ -125,8 +125,8 @@ def EM(heatData,n_components):   #save EM data
 		max_iter = 1000
 	).fit(heatData)
 	# gmm = mixture.GaussianMixture(n_components=n_components).fit(heatData)
-	np.save('means.npy',gmm.means_)
-	np.save('cov.npy',gmm.covariances_)
+	np.save('meansB.npy',gmm.means_)
+	np.save('covB.npy',gmm.covariances_)
 
 def getData():
 	dataCoord = np.load('dataCoord.npy')    #load coordinate data
