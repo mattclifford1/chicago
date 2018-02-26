@@ -4,7 +4,10 @@ from matplotlib import cm
 import plotly.offline as py
 import plotly.plotly as pyonline
 def main():
-	data = False
+	data = True
+	mixture = True
+	plot = True
+
 	if data == True:
 		X, Y, sev = getData()
 		reduction = 1000
@@ -14,36 +17,43 @@ def main():
 		Xnorm = X/np.max(X)
 		Ynorm = Y/np.max(Y)
 		sevData = gmmData(Xnorm, Ynorm, sev)
-		# sevData = gmmData(X, Y, sev)
+		sevData = gmmData(X, Y, sev)
 		np.save('sevData.npy',sevData)
 		# np.save('XY.npy',sevData)
 
-	sevData = np.load('sevData.npy')
-	# #do EM
-	# EM(sevData)
+	
+	if mixture == True:
+		sevData = np.load('sevData.npy')
+		# #do EM
+		EM(sevData,n_components=20)
 
-	n_components = np.arange(1, 60)
-	n_components = [50,70,100,130,200]
-	from sklearn import mixture
-	models = [0]*len(n_components)
-	count = 0
-	for n in n_components:
-		models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
-		print('done '+ str(n))
-		count+=1
-	# models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
-	plt.clf()
-	plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
-	plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
-	for m in models:
-		print(m.bic(sevData))
-		print(m.aic(sevData))
-	plt.legend(loc='best')
-	plt.xlabel('n_components full')
-	plt.show()
-	np.save('modelsFull.npy',models)
+	# 	n_components = np.arange(1, 60)
+	# 	n_components = [220]
+	# 	n_components = [130]
+	# 	from sklearn import mixture
+	# 	models = [0]*len(n_components)
+	# 	count = 0
+	# 	for n in n_components:
+	# 		models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
+	# 		print('done '+ str(n))
+	# 		count+=1
+	# 	# models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
+		
+	# 	plt.clf()
+	# 	plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
+	# 	plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
+	# 	for m in models:
+	# 		print(m.bic(sevData))
+	# 		print(m.aic(sevData))
+	# 	plt.legend(loc='best')
+	# 	plt.xlabel('n_components full')
+	# 	np.save('modelsFull220.npy',models)
+	# 	# plt.show()
+	# models = np.load('modelsFull50200.npy')
+	# gmm = models[3]
+	# np.save('means.npy',gmm.means_)
+	# np.save('cov.npy',gmm.covariances_)
 
-	plot = False
 	if plot == True:
 		#load guassian data computed from EM - need to have run EM before to have saved file
 		means = np.load('means.npy')
@@ -61,6 +71,8 @@ def main():
 		for x in range(means.shape[0]):
 			# data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
 			P +=  G[x][2]
+
+		P = P/np.max(P) #normalise
 		data = [{'x':G[0][0],'y':G[0][1],'z':P, 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=10)}]
 		#plot
 		import plotly.graph_objs as go
@@ -68,17 +80,15 @@ def main():
 		    title='Gaussian Mixture Model of Chicago Crime',
 		    scene = dict(
 	                    xaxis = dict(
-	                        title='Latitude'),
+	                        title='X'),
 	                    yaxis = dict(
-	                        title='Longitude'),
+	                        title='Y'),
 	                    zaxis = dict(
-	                        title='Probability'),)
+	                        title='Z'),)
 		)
 		fig = go.Figure(data=data, layout=layout)
 		py.plot(fig,filename='GMM.html')  #offline plot
 		# pyonline.iplot(fig,filename='GMM') #upload to online
-
-	#do DBscan 
 
 def grids(mean, cov, X, Y):  #make grids of probabilities given guassian data
 	from scipy.stats import multivariate_normal
@@ -103,18 +113,18 @@ def grids(mean, cov, X, Y):  #make grids of probabilities given guassian data
 	P = np.flip(P,1)
 	return [Xmesh, Ymesh, P]
 
-def EM(heatData):   #save EM data
+def EM(heatData,n_components):   #save EM data
 	from sklearn import mixture
 	print('doing EM...')
-	# gmm = mixture.BayesianGaussianMixture(
-	# 	n_components=50,
-	# 	tol=0.001,
-	# 	init_params='kmeans',
-	# 	weight_concentration_prior = 0.00000001,
-	# 	weight_concentration_prior_type='dirichlet_process', 
-	# 	max_iter = 5000
-	# ).fit(heatData)
-	gmm = mixture.GaussianMixture(n_components=50).fit(heatData)
+	gmm = mixture.BayesianGaussianMixture(
+		n_components=n_components,
+		tol=0.001,
+		init_params='kmeans',
+		weight_concentration_prior = 0.000001,
+		weight_concentration_prior_type='dirichlet_process', 
+		max_iter = 1000
+	).fit(heatData)
+	# gmm = mixture.GaussianMixture(n_components=n_components).fit(heatData)
 	np.save('means.npy',gmm.means_)
 	np.save('cov.npy',gmm.covariances_)
 
