@@ -6,7 +6,7 @@ import plotly.plotly as pyonline
 def main():
 	data = True
 	mixture = True
-	plot = True
+	plot = False
 
 	if data == True:
 		X, Y, sev = getData()
@@ -25,11 +25,11 @@ def main():
 	if mixture == True:
 		sevData = np.load('sevData.npy')
 		# #do EM
-		EM(sevData,n_components=300)
+		EM(sevData,n_components=200)
 
 		# n_components = np.arange(1, 60)
 		# n_components = [160]
-		# # n_components = [160]
+		# n_components = [5,10,14,18,23,30,40,50]
 		# from sklearn import mixture
 		# models = [0]*len(n_components)
 		# count = 0
@@ -42,12 +42,12 @@ def main():
 		# plt.clf()
 		# plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
 		# plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
-		# for m in models:
-		# 	print(m.bic(sevData))
-		# 	print(m.aic(sevData))
+		# # for m in models:
+		# # 	print(m.bic(sevData))
+		# # 	print(m.aic(sevData))
 		# plt.legend(loc='best')
 		# plt.xlabel('n_components full')
-		# np.save('modelsFull160.npy',models)
+		# np.save('modelsFull1.npy',models)
 		# plt.show()
 	# models = np.load('modelsFull50200.npy')
 	# gmm = models[3]
