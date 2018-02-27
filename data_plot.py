@@ -3,36 +3,37 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import plotly.offline as py
 import plotly.plotly as pyonline
+import tqdm
 
 def main():
 	partitions = 4
 	for i in range(partitions):
-		X, Y, sev, X_test, Y_test, sev_test = getData(i,partitions)
+		X, Y, sev, X_test, Y_test, sev_test = getData(i,partitions) #currently undersampling
 
 		sevData = gmmData(X, Y, sev)
 		testData = gmmData(X_test, Y_test, sev_test)
 		######normalise heatmap and GMM, then compare closeness of the two
-		reduction = 1000
-		heatIm = makeHeatmap(X, Y, sev,reduction,0, False)
+		reduction = 100
+		heatIm = makeHeatmap(X, Y, sev,reduction,0, test=False)
 		s = heatIm.shape
-		heatImTest = makeHeatmap(X_test, Y_test, sev_test, reduction,s,True)
+		heatImTest = makeHeatmap(X_test, Y_test, sev_test, reduction,s,test=True)
 		#do EM
-		# EM(sevData,n_components=5,i=i)
+		EM(sevData,n_components=10,i=i)
 		print('done')
 		#load guassian data computed from EM - need to have run EM before to have saved file
 		means = np.load('gauss_data/means'+str(i) + '.npy')
 		cov = np.load('gauss_data/cov'+str(i) + '.npy')
 		print(str(means.shape[0]) + ' clusters')
 
+		print('getting dist ...')
 		P = plot3d(means, cov, X, Y, plot = False, shape = s)
-
+		print('done')
 		normTrain = heatIm/np.max(heatIm)
 		normTest = heatImTest/np.max(heatImTest)
 		# normTestData = np.flip(normHeatIm,1)
 
 		selfError = 0 
 		testError = 0
-		import tqdm
 		for x in tqdm.tqdm(range(s[0])):
 			for y in range(s[1]):
 				# heat01 = returnHeatData(normHeatIm,coord)
@@ -76,20 +77,20 @@ def plot3d(means, cov, X, Y, plot, shape):
 		P +=  G[x][2]
 
 	P = P/np.max(P) #normalise
-	data = [{'x':G[0][0],'y':G[0][1],'z':P, 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=10)}]
-	#plot
-	import plotly.graph_objs as go
-	layout = go.Layout(
-	    title='Gaussian Mixture Model of Chicago Crime',
-	    scene = dict(
-                    xaxis = dict(
-                        title='X'),
-                    yaxis = dict(
-                        title='Y'),
-                    zaxis = dict(
-                        title='Z'),)
-	)
 	if plot == True:
+		data = [{'x':G[0][0],'y':G[0][1],'z':P, 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=10)}]
+		#plot
+		import plotly.graph_objs as go
+		layout = go.Layout(
+		    title='Gaussian Mixture Model of Chicago Crime',
+		    scene = dict(
+	                    xaxis = dict(
+	                        title='X'),
+	                    yaxis = dict(
+	                        title='Y'),
+	                    zaxis = dict(
+	                        title='Z'),)
+		)
 		fig = go.Figure(data=data, layout=layout)
 		py.plot(fig,filename='GMM.html')  #offline plot
 		# pyonline.iplot(fig,filename='GMM') #upload to online
@@ -107,14 +108,17 @@ def grids(mean, cov, X, Y, shape):  #make grids of probabilities given guassian 
 	Xmesh = np.transpose(Xmesh)
 	Ymesh = np.transpose(Ymesh)
 
-	coord = np.empty([Xmesh.size,2])
-	count = 0 
-	for i in range(Xmesh.shape[0]):
-		for j in range(Xmesh.shape[1]):
-			coord[count,0] = Xmesh[i,j]
-			coord[count,1] = Ymesh[i,j]
-			count += 1
-
+	coord = np.zeros([Xmesh.size,2])
+	# count = 0 
+	# for i in tqdm.tqdm(range(Xmesh.shape[0])):
+	# 	for j in range(Xmesh.shape[1]):
+	# 		coord[count,0] = Xmesh[i,j]
+	# 		coord[count,1] = Ymesh[i,j]
+	# 		count += 1
+	print('ravel')
+	coord[:,0] = Xmesh.ravel()
+	coord[:,1] = Ymesh.ravel()
+	print('probs')
 	probs = multivariate_normal(mean,cov).pdf(coord)
 	P = np.reshape(probs,[resolutionX, resolutionY])
 	# Xmesh = np.flip(Xmesh,1)
@@ -146,6 +150,12 @@ def getData(it,part):   #get certain partition of the data
 	X = dataCoord[0,:]                      #and separate
 	Y = dataCoord[1,:]
 	IUCR = np.load('IUCR.npy')        #load severity
+
+	##using undersampling   *************
+	l = int(len(X)/100)
+	X = X[0:l]
+	Y = Y[0:l]
+	IUCR = IUCR[0:l]
 
 	#lookup of numberal equivelant (should be done in a dict really)
 	import pandas
@@ -188,7 +198,7 @@ def makeHeatmap(X, Y, sev, red, size, test):
 	if test == False:
 		heatIm =  np.zeros([int(np.ceil((np.max(X)))), int(np.ceil((np.max(Y+1))))])
 	else:
-		heatIm = np.zeros([size[0],size[1]])
+		heatIm = np.zeros([size[0]+1,size[1]+1])
 	#sum severities for image locations, n.b. x axis has to be flipped to match image coordinates
 	for i in range(len(X-1)):
 		heatIm[int(X[i]-1), int(Y[i]-1)] += int(sev[i])
