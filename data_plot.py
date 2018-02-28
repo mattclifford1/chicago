@@ -7,43 +7,46 @@ import tqdm
 
 def main():
 	partitions = 4
-	for i in range(partitions):
-		X, Y, sev, X_test, Y_test, sev_test = getData(i,partitions) #currently undersampling
+	c = [120,130]
+	for clust in c:
+		print('------------------------------- '+str(clust)+' -------------------------------')
+		for i in range(partitions):
+			X, Y, sev, X_test, Y_test, sev_test = getData(i,partitions) #currently undersampling
 
-		sevData = gmmData(X, Y, sev)
-		testData = gmmData(X_test, Y_test, sev_test)
-		######normalise heatmap and GMM, then compare closeness of the two
-		reduction = 100
-		heatIm = makeHeatmap(X, Y, sev,reduction,0, test=False)
-		s = heatIm.shape
-		heatImTest = makeHeatmap(X_test, Y_test, sev_test, reduction,s,test=True)
-		#do EM
-		EM(sevData,n_components=10,i=i)
-		print('done')
-		#load guassian data computed from EM - need to have run EM before to have saved file
-		means = np.load('gauss_data/means'+str(i) + '.npy')
-		cov = np.load('gauss_data/cov'+str(i) + '.npy')
-		print(str(means.shape[0]) + ' clusters')
+			sevData = gmmData(X, Y, sev)
+			testData = gmmData(X_test, Y_test, sev_test)
+			######normalise heatmap and GMM, then compare closeness of the two
+			reduction = 1000
+			heatIm = makeHeatmap(X, Y, sev,reduction,0, test=False)
+			s = heatIm.shape
+			heatImTest = makeHeatmap(X_test, Y_test, sev_test, reduction,s,test=True)
+			#do EM
+			EM(sevData,n_components=clust,i=i)
+			# print('done')
+			#load guassian data computed from EM - need to have run EM before to have saved file
+			means = np.load('gauss_data/means'+str(i) + '.npy')
+			cov = np.load('gauss_data/cov'+str(i) + '.npy')
+			# print(str(means.shape[0]) + ' clusters')
 
-		print('getting dist ...')
-		P = plot3d(means, cov, X, Y, plot = False, shape = s)
-		print('done')
-		normTrain = heatIm/np.max(heatIm)
-		normTest = heatImTest/np.max(heatImTest)
-		# normTestData = np.flip(normHeatIm,1)
+			# print('getting dist ...')
+			P = plot3d(means, cov, X, Y, plot = False, shape = s)
+			# print('done')
+			normTrain = heatIm/np.max(heatIm)
+			normTest = heatImTest/np.max(heatImTest)
+			# normTestData = np.flip(normHeatIm,1)
 
-		selfError = 0 
-		testError = 0
-		for x in tqdm.tqdm(range(s[0])):
-			for y in range(s[1]):
-				# heat01 = returnHeatData(normHeatIm,coord)
-				# testHeat01 = returnHeatData(normTestHeatIm,coord)
-				# gmm01 = returnMaxProb(G, gLen, coord)
-				selfError += abs(normTrain[x,y] - P[x,y])   # could use squared error??
-				testError += abs(normTest[x,y] - P[x,y])
-
-		print('self error '+str(i)+': '+ str(selfError))
-		print('test error '+str(i)+': '+ str(testError) + '\n')
+			selfError = 0 
+			testError = 0
+			for x in range(s[0]):
+				for y in range(s[1]):
+					# heat01 = returnHeatData(normHeatIm,coord)
+					# testHeat01 = returnHeatData(normTestHeatIm,coord)
+					# gmm01 = returnMaxProb(G, gLen, coord)
+					selfError += (normTrain[x,y] - P[x,y])**2   
+					testError += (normTest[x,y] - P[x,y])**2
+			print('ITERATION ' + str(i))
+			print('train error: '+ str(selfError))
+			print('test error:  '+ str(testError) + '\n')
 ######################################
 # def main():
 # 	X, Y, sev, X_test, Y_test, sev_test = getData(0,part=4)
@@ -115,10 +118,10 @@ def grids(mean, cov, X, Y, shape):  #make grids of probabilities given guassian 
 	# 		coord[count,0] = Xmesh[i,j]
 	# 		coord[count,1] = Ymesh[i,j]
 	# 		count += 1
-	print('ravel')
+	# print('ravel')
 	coord[:,0] = Xmesh.ravel()
 	coord[:,1] = Ymesh.ravel()
-	print('probs')
+	# print('probs')
 	probs = multivariate_normal(mean,cov).pdf(coord)
 	P = np.reshape(probs,[resolutionX, resolutionY])
 	# Xmesh = np.flip(Xmesh,1)
@@ -129,7 +132,7 @@ def grids(mean, cov, X, Y, shape):  #make grids of probabilities given guassian 
 
 def EM(heatData, n_components, i):   #save EM data
 	from sklearn import mixture
-	print('doing EM...')
+	# print('doing EM...')
 	# gmm = mixture.BayesianGaussianMixture(
 	# 	n_components=n_components,
 	# 	tol=0.001,
@@ -151,11 +154,11 @@ def getData(it,part):   #get certain partition of the data
 	Y = dataCoord[1,:]
 	IUCR = np.load('IUCR.npy')        #load severity
 
-	##using undersampling   *************
-	l = int(len(X)/100)
-	X = X[0:l]
-	Y = Y[0:l]
-	IUCR = IUCR[0:l]
+	# ##using undersampling   *************
+	# l = int(len(X)/100)
+	# X = X[0:l]
+	# Y = Y[0:l]
+	# IUCR = IUCR[0:l]
 
 	#lookup of numberal equivelant (should be done in a dict really)
 	import pandas
