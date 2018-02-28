@@ -31,14 +31,19 @@ countClean = Counter(BeatsClean)
 keysClean = countClean.keys()
 
 
+
+font = {'family' : 'normal',
+        'weight' : 'bold',
+        'size'   : 20}
+
+plt.rc('font', **font)
+
 plt.bar(list(keys), count.values())
-plt.title('Wards with data missing')
-plt.xlabel('Ward')
+plt.xlabel('Ward no.')
 plt.ylabel('Number of crimes')
 plt.show()
 
 plt.bar(list(keysClean), countClean.values())
-plt.title('Wards without data missing')
-plt.xlabel('Ward')
+plt.xlabel('Ward no.')
 plt.ylabel('Number of crimes')
 plt.show()

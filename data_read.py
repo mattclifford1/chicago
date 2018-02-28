@@ -10,6 +10,8 @@ data = pandas.read_csv('crimes2016.csv', names=colnames)  #extract data
 X = data.XCoordinate.tolist()
 Y = data.YCoordinate.tolist()
 P = data.IUCR.tolist()
+# For data_plot_beats
+#P = data.PrimaryType.tolist()
 B = data.Ward.tolist()
 La = data.Latitude.tolist()
 Lo = data.Longitude.tolist()
