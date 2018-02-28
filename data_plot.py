@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import plotly.offline as py
 import plotly.plotly as pyonline
+from sklearn import mixture
+from joblib import Parallel, delayed
+import multiprocessing
+
 def main():
 	data = True
 	mixture = True
@@ -28,13 +32,15 @@ def main():
 		# EM(sevData,n_components=200)
 
 		n_components = [5,10,14,18,23,30,40,50, 70,90,100,120,140,155,170,200]
-		from sklearn import mixture
-		models = [0]*len(n_components)
-		count = 0
-		for n in n_components:
-			models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
-			print('done '+ str(n))
-			count+=1
+		
+		# models = [0]*len(n_components)
+		# count = 0
+		# for n in n_components:
+		# 	models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
+		# 	print('done '+ str(n))
+		# 	count+=1
+		num_cores = multiprocessing.cpu_count()
+		models = Parallel(n_jobs=num_cores)(delayed(EM)(n) for n in n_components)
 		# models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
 		
 		plt.clf()
@@ -111,20 +117,21 @@ def grids(mean, cov, X, Y):  #make grids of probabilities given guassian data
 	P = np.flip(P,1)
 	return [Xmesh, Ymesh, P]
 
-def EM(heatData,n_components):   #save EM data
-	from sklearn import mixture
-	print('doing EM...')
-	gmm = mixture.BayesianGaussianMixture(
-		n_components=n_components,
-		tol=0.001,
-		init_params='kmeans',
-		weight_concentration_prior = 0.000001,
-		weight_concentration_prior_type='dirichlet_process', 
-		max_iter = 1000
-	).fit(heatData)
-	# gmm = mixture.GaussianMixture(n_components=n_components).fit(heatData)
-	np.save('meansB.npy',gmm.means_)
-	np.save('covB.npy',gmm.covariances_)
+def EM(n_components):   #save EM data
+	heatData = np.load('sevData.npy')
+	print(str(n_components)+' EM...')
+	# gmm = mixture.BayesianGaussianMixture(
+	# 	n_components=n_components,
+	# 	tol=0.001,
+	# 	init_params='kmeans',
+	# 	weight_concentration_prior = 0.000001,
+	# 	weight_concentration_prior_type='dirichlet_process', 
+	# 	max_iter = 1000
+	# ).fit(heatData)
+	gmm = mixture.GaussianMixture(n_components=n_components).fit(heatData)
+	# np.save('meansB.npy',gmm.means_)
+	# np.save('covB.npy',gmm.covariances_)
+	return gmm
 
 def getData():
 	dataCoord = np.load('dataCoord.npy')    #load coordinate data
@@ -133,7 +140,7 @@ def getData():
 	IUCR = np.load('IUCR.npy')        #load severity
 
 	# ##using undersampling   *************
-	# l = int(len(X)/100)
+	# l = int(len(X)/1000)
 	# X = X[0:l]
 	# Y = Y[0:l]
 	# IUCR = IUCR[0:l]
