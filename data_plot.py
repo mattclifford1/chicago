@@ -32,6 +32,7 @@ def main():
 		# EM(sevData,n_components=200)
 
 		n_components = [5,10,14,18,23,30,40,50, 70,90,100,120,140,155,170,200]
+		n_components = [1,2,3,4,5,6,7,8]
 		
 		# models = [0]*len(n_components)
 		# count = 0
@@ -42,7 +43,7 @@ def main():
 		num_cores = multiprocessing.cpu_count()
 		models = Parallel(n_jobs=num_cores)(delayed(EM)(n) for n in n_components)
 		# models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
-		
+		print(models)
 		plt.clf()
 		plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
 		plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
