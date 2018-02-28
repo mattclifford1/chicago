@@ -25,30 +25,28 @@ def main():
 	if mixture == True:
 		sevData = np.load('sevData.npy')
 		# #do EM
-		EM(sevData,n_components=200)
+		# EM(sevData,n_components=200)
 
-		# n_components = np.arange(1, 60)
-		# n_components = [160]
-		# n_components = [5,10,14,18,23,30,40,50]
-		# from sklearn import mixture
-		# models = [0]*len(n_components)
-		# count = 0
-		# for n in n_components:
-		# 	models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
-		# 	print('done '+ str(n))
-		# 	count+=1
-		# # models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
+		n_components = [5,10,14,18,23,30,40,50, 70,90,100,120,140,155,170,200]
+		from sklearn import mixture
+		models = [0]*len(n_components)
+		count = 0
+		for n in n_components:
+			models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
+			print('done '+ str(n))
+			count+=1
+		# models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
 		
-		# plt.clf()
-		# plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
-		# plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
-		# # for m in models:
-		# # 	print(m.bic(sevData))
-		# # 	print(m.aic(sevData))
-		# plt.legend(loc='best')
-		# plt.xlabel('n_components full')
-		# np.save('modelsFull1.npy',models)
-		# plt.show()
+		plt.clf()
+		plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
+		plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
+		# for m in models:
+		# 	print(m.bic(sevData))
+		# 	print(m.aic(sevData))
+		plt.legend(loc='best')
+		plt.xlabel('Number of Components')
+		np.save('modelsFullnew.npy',models)
+		plt.show()
 	# models = np.load('modelsFull50200.npy')
 	# gmm = models[3]
 	# np.save('means.npy',gmm.means_)
@@ -133,6 +131,12 @@ def getData():
 	X = dataCoord[0,:]                      #and separate
 	Y = dataCoord[1,:]
 	IUCR = np.load('IUCR.npy')        #load severity
+
+	# ##using undersampling   *************
+	# l = int(len(X)/100)
+	# X = X[0:l]
+	# Y = Y[0:l]
+	# IUCR = IUCR[0:l]
 
 	#lookup of numberal equivelant (should be done in a dict really)
 	import pandas
