@@ -139,7 +139,7 @@ def EM(n_components):   #save EM data
 	gmm = mixture.GaussianMixture(n_components=n_components).fit(heatData)
 	# np.save('meansB.npy',gmm.means_)
 	# np.save('covB.npy',gmm.covariances_)
-	print done 
+	print 'done' 
 	return gmm
 
 def getData():
