@@ -9,8 +9,8 @@ import multiprocessing
 
 def main():
 	data = True
-	mixture = True
-	plot = False
+	mixture = False
+	plot = True
 
 	if data == True:
 		X, Y, sev = getData()
@@ -29,10 +29,10 @@ def main():
 	if mixture == True:
 		sevData = np.load('sevData.npy')
 		# #do EM
-		# EM(sevData,n_components=200)
+		
 
 		n_components = [5,10,14,18,23,30,40,50, 70,90,100,120,140,155,170,200]
-		n_components = [1,2,3,4,5,6,7,8]
+		# n_components = [150]
 		
 		# models = [0]*len(n_components)
 		# count = 0
@@ -40,35 +40,40 @@ def main():
 		# 	models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
 		# 	print('done '+ str(n))
 		# 	count+=1
-		num_cores = multiprocessing.cpu_count()
-		models = Parallel(n_jobs=num_cores)(delayed(EM)(n) for n in n_components)
+		# num_cores = multiprocessing.cpu_count()
+		# num_cores = 1
+		# models = Parallel(n_jobs=num_cores)(delayed(EM)(n) for n in n_components)
 		# models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
-		print(models)
-		plt.clf()
-		plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
-		plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
-		# for m in models:
-		# 	print(m.bic(sevData))
-		# 	print(m.aic(sevData))
-		plt.legend(loc='best')
-		plt.xlabel('Number of Components')
-		np.save('modelsFullnew.npy',models)
-		plt.show()
+		# print(models)
+		# plt.clf()
+		# plt.plot(n_components, [m.bic(sevData) for m in models], label='BIC')
+		# plt.plot(n_components,[m.aic(sevData) for m in models], label='AIC')
+		# # for m in models:
+		# # 	print(m.bic(sevData))
+		# # 	print(m.aic(sevData))
+		# plt.legend(loc='best')
+		# plt.xlabel('Number of Components')
+		# np.save('modelsFullnew.npy',models)
+		# plt.show()
+
 	# models = np.load('modelsFull50200.npy')
 	# gmm = models[3]
+	# gmm = EM(n_components=150)
 	# np.save('means.npy',gmm.means_)
 	# np.save('cov.npy',gmm.covariances_)
+	# np.save('weights.npy',gmm.weights_)
 
 	if plot == True:
 		#load guassian data computed from EM - need to have run EM before to have saved file
 		means = np.load('means.npy')
 		cov = np.load('cov.npy')
+		weights = np.load('weights.npy')
 
 		print(str(means.shape[0]) + ' clusters')
 		#make list of each guassian as np.array
 		G = [0]*means.shape[0]    #initialise
 		for i in range(means.shape[0]):
-			G[i] = grids(means[i,:], cov[i,:,:], X, Y)
+			G[i] = grids(means[i,:], cov[i,:,:],weights[i], X, Y)
 		#make guassan data into format plotly takes
 		# data = [0]*means.shape[0]
 
@@ -82,7 +87,7 @@ def main():
 		#plot
 		import plotly.graph_objs as go
 		layout = go.Layout(
-		    title='Gaussian Mixture Model of Chicago Crime',
+		    title='Gaussian Mixture Model of Chicago Crime with '+str(means.shape[0]) +  ' Components',
 		    scene = dict(
 	                    xaxis = dict(
 	                        title='X'),
@@ -93,9 +98,9 @@ def main():
 		)
 		fig = go.Figure(data=data, layout=layout)
 		py.plot(fig,filename='GMM.html')  #offline plot
-		# pyonline.iplot(fig,filename='GMM') #upload to online
+		pyonline.iplot(fig,filename='GMM2') #upload to online
 
-def grids(mean, cov, X, Y):  #make grids of probabilities given guassian data
+def grids(mean, cov, weight, X, Y):  #make grids of probabilities given guassian data
 	from scipy.stats import multivariate_normal
 	resolution = 100
 	Xmesh,Ymesh = np.meshgrid(np.linspace(np.min(X),np.max(X),resolution),np.linspace(np.min(Y),np.max(Y),resolution))
@@ -116,6 +121,7 @@ def grids(mean, cov, X, Y):  #make grids of probabilities given guassian data
 	Xmesh = np.flip(Xmesh,1)
 	Ymesh = np.flip(Ymesh,1)
 	P = np.flip(P,1)
+	P = P*weight
 	return [Xmesh, Ymesh, P]
 
 def EM(n_components):   #save EM data
