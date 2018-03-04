@@ -1,9 +1,11 @@
 import numpy as np 
-import matplotlib.pyplot as plt 
-from matplotlib import cm
-import plotly.offline as py
-import plotly.plotly as pyonline
+# import matplotlib.pyplot as plt 
+# from matplotlib import cm
+# import plotly.offline as py
+# import plotly.plotly as pyonline
 import tqdm
+from scipy.stats import multivariate_normal
+from sklearn import mixture
 
 def main():
 	partitions = 4
@@ -85,27 +87,11 @@ def plot3d(means, cov, weights, X, Y, plot, shape):
 		P +=  G[x][2]
 
 	P = P/np.max(P) #normalise
-	if plot == True:
-		data = [{'x':G[0][0],'y':G[0][1],'z':P, 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=10)}]
-		#plot
-		import plotly.graph_objs as go
-		layout = go.Layout(
-		    title='Gaussian Mixture Model of Chicago Crime',
-		    scene = dict(
-	                    xaxis = dict(
-	                        title='X'),
-	                    yaxis = dict(
-	                        title='Y'),
-	                    zaxis = dict(
-	                        title='Z'),)
-		)
-		fig = go.Figure(data=data, layout=layout)
-		py.plot(fig,filename='GMM.html')  #offline plot
-		# pyonline.iplot(fig,filename='GMM') #upload to online
+
 	return P
 
 def grids(mean, cov,weight, X, Y, shape):  #make grids of probabilities given guassian data
-	from scipy.stats import multivariate_normal
+	
 	resolutionX = np.max(X) - np.min(X)
 	resolutionX = shape[0]
 	resolutionY = np.max(Y) - np.min(Y)
@@ -136,7 +122,7 @@ def grids(mean, cov,weight, X, Y, shape):  #make grids of probabilities given gu
 	return [Xmesh, Ymesh, P]
 
 def EM(heatData, n_components, i):   #save EM data
-	from sklearn import mixture
+	
 	# print('doing EM...')
 	# gmm = mixture.BayesianGaussianMixture(
 	# 	n_components=n_components,
