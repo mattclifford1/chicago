@@ -37,8 +37,8 @@ def main():
 		count = 0 
 		for n in n_components:
 			gmm = EM(n)
-			a[i] =m.aic(sevData)
-			b[i] =m.bic(sevData)
+			a[i] =gmm.aic(sevData)
+			b[i] =gmm.bic(sevData)
 			print 'a ' + str(a)
 			print 'b ' + str(b)
 			count +=1
