@@ -1,8 +1,11 @@
 import numpy as np 
-import matplotlib.pyplot as plt 
-from matplotlib import cm
-import plotly.offline as py
-import plotly.plotly as pyonline
+# import matplotlib.pyplot as plt 
+# from matplotlib import cm
+# import plotly.offline as py
+# import plotly.plotly as pyonline
+from joblib import Parallel, delayed
+import multiprocessing
+from sklearn.cluster import KMeans , MiniBatchKMeans
 def main():
 	X, Y, sev = getData()
 	# reduction = 1000
@@ -10,41 +13,48 @@ def main():
 	# heatData = heatmapData(heatIm)
 	sevData = gmmData(X, Y, sev)
 
-	from sklearn.cluster import KMeans , MiniBatchKMeans
-	Nc = np.arange(1, 250)
+	
+	n_components = np.arange(1, 50)
 	score = [0]*(len(Nc))
 	for i in Nc:
 		print(i)
 		kM = MiniBatchKMeans(n_clusters=i).fit(sevData)
 		score[i-1] = kM.inertia_       #Sum of squared distances of samples to their closest cluster center.
 
-	plt.clf()
-	plt.plot(Nc,score)
-	# plt.title('K means error with varying number of clusters')
-	plt.xlabel('Number of clusters')
-	plt.ylabel('Error')
-	plt.savefig('kerror.png')
+	num_cores = multiprocessing.cpu_count()
+	# num_cores = 1
+	score = Parallel(n_jobs=num_cores)(delayed(KM)(n, sevData) for n in n_components)
+	print(score)
+	print(n_components)
+	np.save('score',score)
+	np.save('n_components',n_components)
+	# plt.clf()
+	# plt.plot(n_components,score)
+	# # plt.title('K means error with varying number of clusters')
+	# plt.xlabel('Number of clusters')
+	# plt.ylabel('Error')
+	# plt.savefig('kerror.png')
 
 	# do k means
-	nC = 10
-	kM = KMeans(n_clusters=nC).fit(heatData)
-	m = kM.cluster_centers_
-	labels = kM.labels_
-	means = [0]*nC
-	cov = [0]*nC
-	for i in range(nC):
-		occ = (labels == i).sum()
-		data = [0]*occ
-		count = 0 
-		for k in range(heatData.shape[0]):
-			if labels[k] == i:
-				data[count] = heatData[k,:]
-				count += 1
-		means[i-1] = np.mean(data, axis=0)
-		cov[i-1] = np.cov(np.array(data).T)
-	plt.clf()
-	plt.plot(m[:,1],m[:,0],'x')
-	plt.show()
+	# nC = 10
+	# kM = KMeans(n_clusters=nC).fit(heatData)
+	# m = kM.cluster_centers_
+	# labels = kM.labels_
+	# means = [0]*nC
+	# cov = [0]*nC
+	# for i in range(nC):
+	# 	occ = (labels == i).sum()
+	# 	data = [0]*occ
+	# 	count = 0 
+	# 	for k in range(heatData.shape[0]):
+	# 		if labels[k] == i:
+	# 			data[count] = heatData[k,:]
+	# 			count += 1
+	# 	means[i-1] = np.mean(data, axis=0)
+	# 	cov[i-1] = np.cov(np.array(data).T)
+	# plt.clf()
+	# plt.plot(m[:,1],m[:,0],'x')
+	# plt.show()
 	# #do EM
 	# EM(heatData)
 
@@ -55,32 +65,36 @@ def main():
 	#make list of each guassian as np.array
 	# means = np.array(means)
 	# cov = np.array(cov)
-	me = np.array(means)
-	G = [0]*me.shape[0]    #initialise
-	for i in range(me.shape[0]):
-		G[i] = grids(means[i], cov[i], X, Y)
-	#make guassan data into format plotly takes
-	data = [0]*me.shape[0]
-	for x in range(me.shape[0]):
-		data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
-	#plot
-	import plotly.graph_objs as go
-	layout = go.Layout(
-	    title='Gaussian Mixture Model of Chicago Crime - K means',
-	    scene = dict(
-                    xaxis = dict(
-                        title='Latitude'),
-                    yaxis = dict(
-                        title='Longitude'),
-                    zaxis = dict(
-                        title='Probability'),)
-	)
-	fig = go.Figure(data=data, layout=layout)
-	py.plot(fig,filename='kmeans10.html')  #offline plot
+	# me = np.array(means)
+	# G = [0]*me.shape[0]    #initialise
+	# for i in range(me.shape[0]):
+	# 	G[i] = grids(means[i], cov[i], X, Y)
+	# #make guassan data into format plotly takes
+	# data = [0]*me.shape[0]
+	# for x in range(me.shape[0]):
+	# 	data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
+	# #plot
+	# import plotly.graph_objs as go
+	# layout = go.Layout(
+	#     title='Gaussian Mixture Model of Chicago Crime - K means',
+	#     scene = dict(
+ #                    xaxis = dict(
+ #                        title='Latitude'),
+ #                    yaxis = dict(
+ #                        title='Longitude'),
+ #                    zaxis = dict(
+ #                        title='Probability'),)
+	# )
+	# fig = go.Figure(data=data, layout=layout)
+	# py.plot(fig,filename='kmeans10.html')  #offline plot
 	# pyonline.iplot(fig,filename='kmeans') #upload to online
 
 	#do DBscan 
-
+def KM(k,sevData):
+	kM = MiniBatchKMeans(n_clusters=i).fit(sevData)
+	print(k)
+     #Sum of squared distances of samples to their closest cluster center.
+	return kM.inertia_
 def grids(mean, cov, X, Y):  #make grids of probabilities given guassian data
 	from scipy.stats import multivariate_normal
 	resolution = 100
@@ -112,21 +126,36 @@ def EM(heatData):   #save EM data
 	np.save('cov.npy',gmm.covariances_)
 
 def getData():
-	dataCoord = np.load('dataCoord.npy')    #load coordinate data
+	dataCoord = np.load('dataCoord2.npy')    #load coordinate data
+	# dataCoord = np.load('dataLL.npy')    #load coordinate data
 	X = dataCoord[0,:]                      #and separate
 	Y = dataCoord[1,:]
-	sevStr = np.load('severity.npy')        #load severity
+	IUCR = np.load('IUCR.npy')        #load severity
+
+	# ##using undersampling   *************
+	# l = int(len(X)/1000)
+	# X = X[0:l]
+	# Y = Y[0:l]
+	# IUCR = IUCR[0:l]
 
 	#lookup of numberal equivelant (should be done in a dict really)
-	primary = ['ARSON', 'ASSAULT', 'BATTERY','BURGLARY','CONCEALED CARRY LICENSE VIOLATION','CRIM SEXUAL ASSAULT','CRIMINAL DAMAGE','CRIMINAL TRESPASS','DECEPTIVE PRACTICE','GAMBLING','HOMICIDE','HUMAN TRAFFICKING','INTERFERENCE WITH PUBLIC OFFICER','INTIMIDATION','KIDNAPPING','LIQUOR LAW VIOLATION','MOTOR VEHICLE THEFT','NARCOTICS','OBSCENITY','OFFENSE INVOLVING CHILDREN','OTHER NARCOTIC VIOLATION','OTHER OFFENSE','PROSTITUTION','PUBLIC INDECENCY','PUBLIC PEACE VIOLATION', 'ROBBERY','SEX OFFENSE','STALKING','THEFT','WEAPONS VIOLATION','NON-CRIMINAL']
-	severity = [0.5,0.72,0.89,0.44,0.11,0.94,0.28,0.11,0.44,0.11,0.94,1.0,0.11,0.22,1.0,0.11,0.17,0.22,0.11,0.89,0.22,0.11,0.17,0.11,0.22,0.94,0.94,0.67,0.17,0.22,0]
+	import pandas
+	colnames = ['IUCR_Codes','Primary_Type','Secondary_Type','Felony_Class','Maximum','Minimum','Mean_Sentence','Severity_Normalised','Severity_Rounded','Severity_Scaled']
+	data = pandas.read_csv('AllSeverityData2.csv', names=colnames)  #extract data
 
-	sev = np.zeros(len(sevStr))
+	IUCR_Codes = data.IUCR_Codes.tolist()
+	severity = data.Severity_Scaled.tolist()
+
+	IUCR_Codes.remove('IUCR_Codes')
+	severity.remove('Severity_Scaled')
+
+	for i in range(len(severity)):
+		severity[i] = float(severity[i])
+	sev = np.zeros(len(IUCR))
 	#assign severity str to numerical value
-	for i in range(len(sevStr)):
-		ind = primary.index(sevStr[i])
+	for i in range(len(IUCR)):
+		ind = IUCR_Codes.index(IUCR[i])
 		sev[i] = severity[ind]
-	sev = sev/(np.max(sev)) #normalise
 	return X, Y, sev
 
 def makeHeatmap(X, Y, sev, data_reduce):
