@@ -68,7 +68,10 @@ def main():
 		means = np.load('means.npy')
 		cov = np.load('cov.npy')
 		weights = np.load('weights.npy')
-
+		red = False
+		if red == True:
+			X = X/1000
+			Y = Y/1000
 		print(str(means.shape[0]) + ' clusters')
 		#make list of each guassian as np.array
 		G = [0]*means.shape[0]    #initialise
@@ -97,8 +100,8 @@ def main():
 	                        title='Z'),)
 		)
 		fig = go.Figure(data=data, layout=layout)
-		py.plot(fig,filename='GMM.html')  #offline plot
-		pyonline.iplot(fig,filename='GMM2') #upload to online
+		py.plot(fig,filename='GMM3.html')  #offline plot
+		# pyonline.iplot(fig,filename='GMM2') #upload to online
 
 def grids(mean, cov, weight, X, Y):  #make grids of probabilities given guassian data
 	from scipy.stats import multivariate_normal
@@ -142,6 +145,7 @@ def EM(n_components):   #save EM data
 
 def getData():
 	dataCoord = np.load('dataCoord.npy')    #load coordinate data
+	# dataCoord = np.load('dataLL.npy')    #load coordinate data
 	X = dataCoord[0,:]                      #and separate
 	Y = dataCoord[1,:]
 	IUCR = np.load('IUCR.npy')        #load severity
