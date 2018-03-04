@@ -39,20 +39,20 @@ def main():
 			normTest = heatImTest/np.max(heatImTest)
 			# normTestData = np.flip(normHeatIm,1)
 
-			selfError = 0 
+			trainError = 0 
 			testError = 0
 			for x in range(s[0]):
 				for y in range(s[1]):
 					# heat01 = returnHeatData(normHeatIm,coord)
 					# testHeat01 = returnHeatData(normTestHeatIm,coord)
 					# gmm01 = returnMaxProb(G, gLen, coord)
-					selfError += (normTrain[x,y] - P[x,y])**2   
+					trainError += (normTrain[x,y] - P[x,y])**2   
 					testError += (normTest[x,y] - P[x,y])**2
 			test[i] = testError
 			train[i] = trainError
-		print 'train error: '+ str(selfError) 
-		print 'test error:  '+ str(testError) 
-######################################
+		print('train error: '+ str(trainError))
+		print('test error:  '+ str(testError))
+#####################################
 # def main():
 # 	X, Y, sev, X_test, Y_test, sev_test = getData(0,part=4)
 # 	print(len(X))
