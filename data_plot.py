@@ -75,7 +75,7 @@ def plot3d(means, cov, weights, X, Y, plot, shape):
 	#make list of each guassian as np.array
 	G = [0]*means.shape[0]    #initialise
 	for i in range(means.shape[0]):
-		G[i] = grids(means[i,:], cov[i,:,:],weight[i], X, Y, shape)
+		G[i] = grids(means[i,:], cov[i,:,:],weights[i], X, Y, shape)
 	#make guassan data into format plotly takes
 	# data = [0]*means.shape[0]
 
