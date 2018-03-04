@@ -5,8 +5,8 @@ import multiprocessing
 
 def main():
 	data = True
-	mixture = False
-	plot = True
+	mixture = True
+	plot = False
 
 	if data == True:
 		X, Y, sev = getData()
@@ -20,7 +20,7 @@ def main():
 		# #do EM
 		
 
-		n_components = [5,10,14,18,23,30,40,50, 70,90,100]
+		n_components = [110,130,140,150,160, 200]
 		# n_components = [150]
 		
 		# models = [0]*len(n_components)
@@ -53,7 +53,7 @@ def main():
 		# # 	print(m.aic(sevData))
 		# plt.legend(loc='best')
 		# plt.xlabel('Number of Components')
-		np.save('snowy.npy',models)
+		# np.save('snowy.npy',models)
 		# plt.show()
 
 	# models = np.load('modelsFull50200.npy')
