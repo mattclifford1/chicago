@@ -15,11 +15,11 @@ def main():
 
 	
 	n_components = np.arange(1, 50)
-	score = [0]*(len(Nc))
-	for i in Nc:
-		print(i)
-		kM = MiniBatchKMeans(n_clusters=i).fit(sevData)
-		score[i-1] = kM.inertia_       #Sum of squared distances of samples to their closest cluster center.
+	# score = [0]*(len(Nc))
+	# for i in Nc:
+	# 	print(i)
+	# 	kM = MiniBatchKMeans(n_clusters=i).fit(sevData)
+	# 	score[i-1] = kM.inertia_       #Sum of squared distances of samples to their closest cluster center.
 
 	num_cores = multiprocessing.cpu_count()
 	# num_cores = 1
