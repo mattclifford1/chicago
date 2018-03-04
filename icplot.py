@@ -6,7 +6,9 @@ m0 = np.load('modelsFull1.npy')
 m1 = np.load('modelsFull50200.npy')
 m2 = np.load('modelsFull160.npy')
 sevData = np.load('sevData.npy')
-
+m = np.load('snowyModels.npy')
+print(m)
+print(m.shape)
 models = [0]*(8+6)
 # models[0] = m1[0]
 # models[1] = m1[1]

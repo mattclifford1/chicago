@@ -1,8 +1,4 @@
 import numpy as np 
-import matplotlib.pyplot as plt 
-from matplotlib import cm
-import plotly.offline as py
-import plotly.plotly as pyonline
 from sklearn import mixture
 from joblib import Parallel, delayed
 import multiprocessing
@@ -14,13 +10,6 @@ def main():
 
 	if data == True:
 		X, Y, sev = getData()
-		reduction = 1000
-		heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
-		# gmmData ,x,y = makeHeatmap(X, Y, sev, 1)
-		# heatData = heatmapData(gmmData)
-		Xnorm = X/np.max(X)
-		Ynorm = Y/np.max(Y)
-		sevData = gmmData(Xnorm, Ynorm, sev)
 		sevData = gmmData(X, Y, sev)
 		np.save('sevData.npy',sevData)
 		# np.save('XY.npy',sevData)
@@ -31,7 +20,7 @@ def main():
 		# #do EM
 		
 
-		n_components = [5,10,14,18,23,30,40,50, 70,90,100,120,140,155,170,200]
+		n_components = [5,10,14,18,23,30,40,50, 70,90,100]
 		# n_components = [150]
 		
 		# models = [0]*len(n_components)
@@ -40,9 +29,9 @@ def main():
 		# 	models[count] = mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData)
 		# 	print('done '+ str(n))
 		# 	count+=1
-		# num_cores = multiprocessing.cpu_count()
-		# num_cores = 1
-		# models = Parallel(n_jobs=num_cores)(delayed(EM)(n) for n in n_components)
+		num_cores = multiprocessing.cpu_count()
+		num_cores = 8
+		models = Parallel(n_jobs=num_cores)(delayed(EM)(n) for n in n_components)
 		# models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
 		# print(models)
 		# plt.clf()
@@ -53,7 +42,7 @@ def main():
 		# # 	print(m.aic(sevData))
 		# plt.legend(loc='best')
 		# plt.xlabel('Number of Components')
-		# np.save('modelsFullnew.npy',models)
+		np.save('snowy.npy',models)
 		# plt.show()
 
 	# models = np.load('modelsFull50200.npy')
