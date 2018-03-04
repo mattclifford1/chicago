@@ -91,7 +91,7 @@ def main():
 
 	#do DBscan 
 def KM(k,sevData):
-	kM = MiniBatchKMeans(n_clusters=i).fit(sevData)
+	kM = MiniBatchKMeans(n_clusters=k).fit(sevData)
 	print(k)
      #Sum of squared distances of samples to their closest cluster center.
 	return kM.inertia_
