@@ -5,24 +5,25 @@ import plotly.offline as py
 import plotly.plotly as pyonline
 def main():
 	X, Y, sev = getData()
-	reduction = 1000
-	heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
-	heatData = heatmapData(heatIm)
+	# reduction = 1000
+	# heatIm, x_min, y_min = makeHeatmap(X, Y, sev, reduction)
+	# heatData = heatmapData(heatIm)
+	sevData = gmmData(X, Y, sev)
 
 	from sklearn.cluster import KMeans
-	# Nc = np.arange(1, 100)
-	# score = [0]*(len(Nc))
-	# for i in Nc:
-	# 	print(i)
-	# 	kM = KMeans(n_clusters=i).fit(heatIm)
-	# 	score[i-1] = kM.inertia_       #Sum of squared distances of samples to their closest cluster center.
+	Nc = np.arange(1, 250)
+	score = [0]*(len(Nc))
+	for i in Nc:
+		print(i)
+		kM = KMeans(n_clusters=i).fit(sevData)
+		score[i-1] = kM.inertia_       #Sum of squared distances of samples to their closest cluster center.
 
-	# plt.clf()
-	# plt.plot(Nc,score)
-	# plt.title('K means error with varying number of clusters')
-	# plt.xlabel('Number of clusters')
-	# plt.ylabel('Error')
-	# plt.show()
+	plt.clf()
+	plt.plot(Nc,score)
+	plt.title('K means error with varying number of clusters')
+	plt.xlabel('Number of clusters')
+	plt.ylabel('Error')
+	plt.show()
 
 	# do k means
 	nC = 10
@@ -41,9 +42,9 @@ def main():
 				count += 1
 		means[i-1] = np.mean(data, axis=0)
 		cov[i-1] = np.cov(np.array(data).T)
-	# plt.clf()
-	# plt.plot(m[:,1],m[:,0],'x')
-	# plt.show()
+	plt.clf()
+	plt.plot(m[:,1],m[:,0],'x')
+	plt.show()
 	# #do EM
 	# EM(heatData)
 
@@ -171,6 +172,21 @@ def getSev(x1, y1, heatIm, data_reduce, x_min, y_min):  #x and y are point from 
 	sevNorm = sev1/maxSev
 
 	return sevNorm
+
+def gmmData(X, Y, sev):      #increases occurancy due to severity
+	data_points = int(sum(sev))
+	# data_points = int(len(X))
+	data = np.zeros([data_points,2])
+	count = 0 
+	for i in range(len(X)):
+	# for i in range(10000):
+		units = int(sev[i])
+		# units = int(1)
+		for k in range(units):
+			data[count,0] = X[i]
+			data[count,1] = Y[i]
+			count += 1
+	return data
 
 def heatmapData(heatIm):    #converts pixels to crime data points of the heatmap
 	data_points = sum(sum(heatIm))   #number of crime units
