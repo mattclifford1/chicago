@@ -30,8 +30,19 @@ def main():
 		# 	print('done '+ str(n))
 		# 	count+=1
 		num_cores = multiprocessing.cpu_count()
-		num_cores = 8
-		models = Parallel(n_jobs=num_cores)(delayed(EM)(n) for n in n_components)
+		# num_cores = 8
+		# models = Parallel(n_jobs=num_cores)(delayed(EM)(n) for n in n_components)
+		a = [0]*len(n_components)
+		b = [0]*len(n_components)
+		count = 0 
+		for n in n_components:
+			gmm = EM(n)
+			a[i] =m.aic(sevData)
+			b[i] =m.bic(sevData)
+			print 'a ' + str(a)
+			print 'b ' + str(b)
+			count +=1
+
 		# models = [mixture.GaussianMixture(n, covariance_type='full', random_state=0).fit(sevData) for n in n_components]
 		# print(models)
 		# plt.clf()
