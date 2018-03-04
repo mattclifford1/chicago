@@ -171,10 +171,10 @@ def makeHeatmap(X, Y, sev, data_reduce):
 		heatIm[abs(int(y_shift[i])-heatIm.shape[0]+1), int(x_shift[i])] += int(sev[i])
 
 	#plot and save image
-	plt.imshow(heatIm,cmap='hot')
-	plt.xticks([])
-	plt.yticks([])
-	plt.savefig('heatmap.png')
+	# plt.imshow(heatIm,cmap='hot')
+	# plt.xticks([])
+	# plt.yticks([])
+	# plt.savefig('heatmap.png')
 	# print('saved')
 	# plt.clf()
 	return heatIm, x_min, y_min
