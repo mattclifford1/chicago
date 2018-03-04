@@ -33,7 +33,7 @@ def main():
 		# np.save('sevData.npy',sevData)
 		# np.save('XY.npy',sevData)
 
-	gmm = EM(n_components=150,heatData)
+	gmm = EM(150,heatData)
 	np.save('means2.npy',gmm.means_)
 	np.save('cov2.npy',gmm.covariances_)
 	np.save('weights2.npy',gmm.weights_)
