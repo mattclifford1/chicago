@@ -10,20 +10,20 @@ def main():
 	# heatData = heatmapData(heatIm)
 	sevData = gmmData(X, Y, sev)
 
-	from sklearn.cluster import KMeans
+	from sklearn.cluster import KMeans , MiniBatchKMeans
 	Nc = np.arange(1, 250)
 	score = [0]*(len(Nc))
 	for i in Nc:
 		print(i)
-		kM = KMeans(n_clusters=i).fit(sevData)
+		kM = MiniBatchKMeans(n_clusters=i).fit(sevData)
 		score[i-1] = kM.inertia_       #Sum of squared distances of samples to their closest cluster center.
 
 	plt.clf()
 	plt.plot(Nc,score)
-	plt.title('K means error with varying number of clusters')
+	# plt.title('K means error with varying number of clusters')
 	plt.xlabel('Number of clusters')
 	plt.ylabel('Error')
-	plt.show()
+	plt.savefig('kerror.png')
 
 	# do k means
 	nC = 10
