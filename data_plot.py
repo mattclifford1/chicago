@@ -24,12 +24,12 @@ def main():
 			s = heatIm.shape
 			heatImTest = makeHeatmap(X_test, Y_test, sev_test, reduction,s,test=True)
 			#do EM
-			EM(sevData,n_components=clust,i=i)
+			gmm = EM(sevData,n_components=clust,i=i)
 			# print('done')
 			#load guassian data computed from EM - need to have run EM before to have saved file
-			means = np.load('gauss_data/means'+str(i) + '.npy')
-			cov = np.load('gauss_data/cov'+str(i) + '.npy')
-			weights = np.load('gauss_data/weights'+str(i) + '.npy')
+			means = gmm.means_
+			cov = gmm.covariances_
+			weights = gmm.weights_
 			# print(str(means.shape[0]) + ' clusters')
 
 			# print('getting dist ...')
@@ -147,9 +147,10 @@ def EM(heatData, n_components, i):   #save EM data
 	# 	max_iter = 1000
 	# ).fit(heatData)
 	gmm = mixture.GaussianMixture(n_components=n_components).fit(heatData)
-	np.save('gauss_data/means'+str(i) + '.npy',gmm.means_)
-	np.save('gauss_data/cov'+str(i) + '.npy',gmm.covariances_)
-	np.save('gauss_data/weights'+str(i) + '.npy',gmm.weights_)
+	# np.save('gauss_data/means'+str(i) + '.npy',gmm.means_)
+	# np.save('gauss_data/cov'+str(i) + '.npy',gmm.covariances_)
+	# np.save('gauss_data/weights'+str(i) + '.npy',gmm.weights_)
+	return gmm
 
 def getData(it,part):   #get certain partition of the data
 	if it >= part:
