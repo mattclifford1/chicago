@@ -8,7 +8,10 @@ import tqdm
 def main():
 	partitions = 4
 	c = [120,130]
+	c = [20,50,100,120,140,160,200]
 	for clust in c:
+		train = [0]*4
+		test = [0]*4
 		print('------------------------------- '+str(clust)+' -------------------------------')
 		for i in range(partitions):
 			X, Y, sev, X_test, Y_test, sev_test = getData(i,partitions) #currently undersampling
@@ -26,10 +29,11 @@ def main():
 			#load guassian data computed from EM - need to have run EM before to have saved file
 			means = np.load('gauss_data/means'+str(i) + '.npy')
 			cov = np.load('gauss_data/cov'+str(i) + '.npy')
+			weights = np.load('gauss_data/weights'+str(i) + '.npy')
 			# print(str(means.shape[0]) + ' clusters')
 
 			# print('getting dist ...')
-			P = plot3d(means, cov, X, Y, plot = False, shape = s)
+			P = plot3d(means, cov,weights, X, Y, plot = False, shape = s)
 			# print('done')
 			normTrain = heatIm/np.max(heatIm)
 			normTest = heatImTest/np.max(heatImTest)
@@ -44,9 +48,10 @@ def main():
 					# gmm01 = returnMaxProb(G, gLen, coord)
 					selfError += (normTrain[x,y] - P[x,y])**2   
 					testError += (normTest[x,y] - P[x,y])**2
-			print('ITERATION ' + str(i))
-			print('train error: '+ str(selfError))
-			print('test error:  '+ str(testError) + '\n')
+			test[i] = testError
+			train[i] = trainError
+		print 'train error: '+ str(selfError) 
+		print 'test error:  '+ str(testError) 
 ######################################
 # def main():
 # 	X, Y, sev, X_test, Y_test, sev_test = getData(0,part=4)
@@ -66,11 +71,11 @@ def returnMaxProb(G, gLen, coord):
 		# plt.show()
 	return np.max(p_s)
 
-def plot3d(means, cov, X, Y, plot, shape):
+def plot3d(means, cov, weights, X, Y, plot, shape):
 	#make list of each guassian as np.array
 	G = [0]*means.shape[0]    #initialise
 	for i in range(means.shape[0]):
-		G[i] = grids(means[i,:], cov[i,:,:], X, Y, shape)
+		G[i] = grids(means[i,:], cov[i,:,:],weight[i], X, Y, shape)
 	#make guassan data into format plotly takes
 	# data = [0]*means.shape[0]
 
@@ -99,7 +104,7 @@ def plot3d(means, cov, X, Y, plot, shape):
 		# pyonline.iplot(fig,filename='GMM') #upload to online
 	return P
 
-def grids(mean, cov, X, Y, shape):  #make grids of probabilities given guassian data
+def grids(mean, cov,weight, X, Y, shape):  #make grids of probabilities given guassian data
 	from scipy.stats import multivariate_normal
 	resolutionX = np.max(X) - np.min(X)
 	resolutionX = shape[0]
@@ -127,7 +132,7 @@ def grids(mean, cov, X, Y, shape):  #make grids of probabilities given guassian 
 	# Xmesh = np.flip(Xmesh,1)
 	# Ymesh = np.flip(Ymesh,1)
 	# P = np.flip(P,1)
-
+	P = P*weight
 	return [Xmesh, Ymesh, P]
 
 def EM(heatData, n_components, i):   #save EM data
@@ -144,6 +149,7 @@ def EM(heatData, n_components, i):   #save EM data
 	gmm = mixture.GaussianMixture(n_components=n_components).fit(heatData)
 	np.save('gauss_data/means'+str(i) + '.npy',gmm.means_)
 	np.save('gauss_data/cov'+str(i) + '.npy',gmm.covariances_)
+	np.save('gauss_data/weights'+str(i) + '.npy',gmm.weights_)
 
 def getData(it,part):   #get certain partition of the data
 	if it >= part:
