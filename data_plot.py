@@ -14,7 +14,7 @@ def main():
 	sevData = gmmData(X, Y, sev)
 
 	
-	n_components = np.arange(1, 100)
+	n_components = np.arange(2, 50)
 	# score = [0]*(len(Nc))
 	# for i in Nc:
 	# 	print(i)
