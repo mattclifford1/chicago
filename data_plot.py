@@ -86,22 +86,42 @@ def main():
 			P +=  G[x][2]
 
 		P = P/np.max(P) #normalise
-		data = [{'x':G[0][0],'y':G[0][1],'z':P, 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=10)}]
-		#plot
-		import plotly.graph_objs as go
-		layout = go.Layout(
-		    title='Gaussian Mixture Model of Chicago Crime with '+str(means.shape[0]) +  ' Components',
-		    scene = dict(
-	                    xaxis = dict(
-	                        title='X'),
-	                    yaxis = dict(
-	                        title='Y'),
-	                    zaxis = dict(
-	                        title='Z'),)
-		)
-		fig = go.Figure(data=data, layout=layout)
-		py.plot(fig,filename='GMM3.html')  #offline plot
-		# pyonline.iplot(fig,filename='GMM2') #upload to online
+		np.save('P_grid.npy',P)
+		P = np.load('P_grid.npy')
+		contour = False
+		if contour == False:
+			import matplotlib
+			# P = np.nan_to_num(P)
+			plt.clf()
+			font = {'family' : 'normal',
+        			'weight' : 'bold',
+        			'size'   : 10}
+
+			matplotlib.rc('font', **font)
+
+			plt.contour(G[0][0],G[0][1],P, 15, linewidths=0.5, colors='k')
+			plt.contourf(G[0][0],G[0][1],P, 15, vmax=P.max(), vmin=P.min(),cmap='BuPu')
+			plt.colorbar()  # draw colorbar
+			plt.xlabel('X Coordinate')
+			plt.ylabel('Y Coordinate')
+			plt.show()
+		else:
+			data = [{'x':G[0][0],'y':G[0][1],'z':P, 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=10)}]
+			#plot
+			import plotly.graph_objs as go
+			layout = go.Layout(
+			    title='Gaussian Mixture Model of Chicago Crime with '+str(means.shape[0]) +  ' Components',
+			    scene = dict(
+		                    xaxis = dict(
+		                        title='X'),
+		                    yaxis = dict(
+		                        title='Y'),
+		                    zaxis = dict(
+		                        title='Z'),)
+			)
+			fig = go.Figure(data=data, layout=layout)
+			py.plot(fig,filename='GMMtest.html')  #offline plot
+			# pyonline.iplot(fig,filename='GMM2') #upload to online
 
 def grids(mean, cov, weight, X, Y):  #make grids of probabilities given guassian data
 	from scipy.stats import multivariate_normal
@@ -174,6 +194,7 @@ def getData():
 	for i in range(len(IUCR)):
 		ind = IUCR_Codes.index(IUCR[i])
 		sev[i] = severity[ind]
+
 	return X, Y, sev
 
 def makeHeatmap(X, Y, sev, data_reduce):
