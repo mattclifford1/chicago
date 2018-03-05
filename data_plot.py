@@ -50,8 +50,8 @@ def main():
 					testError += (normTest[x,y] - P[x,y])**2
 			test[i] = testError
 			train[i] = trainError
-		print('train error: '+ str(trainError))
-		print('test error:  '+ str(testError))
+		print('train error: '+ str(train))
+		print('test error:  '+ str(test))
 #####################################
 # def main():
 # 	X, Y, sev, X_test, Y_test, sev_test = getData(0,part=4)
