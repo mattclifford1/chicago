@@ -25,17 +25,17 @@ m_test_140 = np.array([64.043182874712031, 42.92233613137482, 49.941743612888985
 m_train_160 = np.array([52.750918078392779, 44.78176372302616, 40.063620771824226, 41.965865539386101])
 m_test_160 = np.array([47.823139954142853, 45.245653839445204, 46.404887550338231, 41.475636177694618])
 
-# m_train_200 = np.array()
-# m_test_200 = np.array()
+m_train_200 = np.array([63.05614671592445, 44.31111979482915, 41.85473474391684, 44.48789032055033])
+m_test_200 = np.array([61.21517505968182, 43.955651508479455, 48.162186850718385, 42.94123884138955])
 
 # train = [m_train_20, m_train_50, m_train_100, m_train_120, m_train_130, m_train_140, m_train_150, m_train_160, m_train_200]
 # test = [m_test_20, m_test_50, m_test_100, m_test_120, m_test_130, m_test_140, m_test_150, m_test_160, m_test_200]
 
-train = [m_train_20, m_train_50, m_train_100, m_train_120, m_train_140,  m_train_160]
-test = [m_test_20, m_test_50, m_test_100, m_test_120, m_test_140, m_test_160]
+train = [m_train_20, m_train_50, m_train_100, m_train_120, m_train_140,  m_train_160,  m_train_200]
+test = [m_test_20, m_test_50, m_test_100, m_test_120, m_test_140, m_test_160, m_test_200]
 
 components = [20,50,100,120,130,140,150,160,200]
-components = [20,50,100,120,140,160]
+components = [20,50,100,120,140,160,200]
 mean = [0]* len(train)
 lower = [0]* len(train)
 upper = [0]* len(train)
