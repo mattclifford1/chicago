@@ -33,6 +33,8 @@ def main():
 		X, Y, sev = getData()
 		sevData = gmmData(X, Y, sev)
 		np.save('sevData.npy',sevData)
+		print(np.max(X))
+		print(np.max(Y))
 	
 	if criterion == True:
 		sevData = np.load('sevData.npy')
@@ -76,7 +78,7 @@ def main():
 			# data[x] = {'x':G[x][0],'y':G[x][1],'z':G[x][2], 'type':'surface','text':dict(a=3),'colorscale':'Jet','colorbar':dict(lenmode='fraction', nticks=1)}
 			P +=  G[x][2]
 		P = P/np.max(P) #normalise
-
+		np.save('severities.npy', P)
 		contour = True
 		plot3d = True  #will need to have a plotly account logged in at terminal
 		if contour == True:
